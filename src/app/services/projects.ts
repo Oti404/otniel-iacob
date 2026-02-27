@@ -49,6 +49,15 @@ export const academicData = {
       date: "2026-01-27",
       status: "wip" as const
     },
+    {
+    name: "AI Outfit Recommender (Innovation Labs 2026)",
+    description: "AI-powered outfit suggestion system driven by user interaction and reward-based feedback. Developed for the Innovation Labs 2026 Hackathon, it is designed as both a standalone product and a licensable B2B solution for fashion e-commerce to boost sales and interactivity.",
+    tech: "Python, AI (Machine Learning / RL), Web/Frontend",
+    contributors: ["Robert Hatos", "Gabriel Dumiter", "Carina Faur", "Mara Dorhoi"],
+    display: true,
+    date: "2026-03-08",
+    status: "wip" as const
+    },
 
     // =================================================================
     // 2. COMPLETED / RECENT PROJECTS
