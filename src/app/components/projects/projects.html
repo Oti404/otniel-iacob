@@ -31,9 +31,23 @@
       <p class="description">{{ p.description }}</p>
 
       <div class="contributors" *ngIf="p.contributors && p.contributors.length > 0">
-        <small>Team: <strong>{{ p.contributors.join(', ') }}</strong></small>
-      </div>
+  <small>Team:</small>
+  <div class="contributors-list">
+    <ng-container *ngFor="let c of p.contributors; let last = last">
 
+      <ng-container *ngIf="isContributorLink(c); else plainName">
+        <a [href]="c[1]" target="_blank" class="contributor-chip contributor-link">
+          {{ c[0] }}
+        </a>
+      </ng-container>
+
+      <ng-template #plainName>
+        <span class="contributor-chip">{{ c }}</span>
+      </ng-template>
+
+    </ng-container>
+  </div>
+</div>
       <div class="tech-stack">
         <span class="tech-tag">{{ p.tech }}</span>
       </div>

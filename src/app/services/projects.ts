@@ -7,7 +7,7 @@ export interface Project {
   link?: string;
   liveLink?: string;
 
-  contributors?: string[];
+  contributors?: (string | [string, string])[];
   awards?: string;
   display: boolean;
 
@@ -25,7 +25,7 @@ export const academicData = {
       name: "University Research Project: NLP in Finance",
       description: "Research and development of AI solutions for financial text analysis (Sentiment Analysis). Focus on creating datasets and algorithms for predicting stock market trends.",
       tech: "Python, NLP, Machine Learning, TensorFlow",
-      contributors: ["Coord. Assist. Prof. Dr. BRICIU Anamaria"],
+      contributors: [["Coord. Assist. Prof. Dr. BRICIU Anamaria", "https://www.linkedin.com/in/anamaria-briciu-626109101/"]],
       display: true,
       date: "2026-02-01",
       status: "wip" as const
@@ -44,19 +44,19 @@ export const academicData = {
       name: "Smart City Parking System (Hackathon)",
       description: "Digital solution for intelligent public parking management. The system automatically identifies cars using AI (OCR) and verifies subscriptions in real-time.",
       tech: "Angular, Python, AI (OCR)",
-      contributors: ["Robert-Lucian Hatos", "Gabriel Pașca", "Cătălin Mirișan"],
+      contributors: [["Robert Hatos", "https://www.linkedin.com/in/robert-hatos-251598378/"], "Gabriel Pașca"],
       display: true,
       date: "2026-01-27",
       status: "wip" as const
     },
     {
-    name: "AI Outfit Recommender (Innovation Labs 2026)",
-    description: "AI-powered outfit suggestion system driven by user interaction and reward-based feedback. Developed for the Innovation Labs 2026 Hackathon, it is designed as both a standalone product and a licensable B2B solution for fashion e-commerce to boost sales and interactivity.",
-    tech: "Python, AI (Machine Learning / RL), Web/Frontend",
-    contributors: ["Robert Hatos", "Gabriel Dumiter", "Carina Faur", "Mara Dorhoi"],
-    display: true,
-    date: "2026-03-08",
-    status: "wip" as const
+      name: "WearWise (Innovation Labs 2026)",
+      description: "WearWise is an digital wardrobe platform that helps users organize their clothes, create outfits, and discover new style combinations from what they already own.",
+      tech: "Web/Frontend, React, Github, Vercel, Lovable, Buisness, Marketing",
+      contributors: [["Robert Hatos", "https://www.linkedin.com/in/robert-hatos-251598378/"], ["Gabriel Dumiter", "https://www.linkedin.com/in/george-dumiter-647a9a3b5/"], ["Carina Faur", "https://www.linkedin.com/in/carina-faur/"], ["Mara Dorhoi", "https://www.linkedin.com/in/mara-dorhoi-1a32033b5/"]],
+      display: true,
+      date: "2026-03-08",
+      status: "wip" as const
     },
 
     // =================================================================

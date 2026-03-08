@@ -436,7 +436,15 @@ $text-grey: #a0aab5;
     }
   }
 }
+.contributor-link {
+  color: var(--accent-color); // match your cyberpunk theme
+  text-decoration: none;
 
+  &:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+  }
+}
 /* =========================================
    CARD HEADER (CU LINIE GLITCH)
    ========================================= */
@@ -476,6 +484,7 @@ $text-grey: #a0aab5;
     /* Animația de bază (suprascrisă de loop-ul de mai sus) */
     animation: cyberLineMove 4s linear infinite;
   }
+  
 
   /* --- TITLUL --- */
   h2 {
@@ -528,5 +537,48 @@ $text-grey: #a0aab5;
     opacity: 0.3;
     width: 60%;
     left: 40%; /* Linia se mută spre dreapta */
+  }
+}
+.contributors {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+
+  small {
+    color: var(--text-muted, #888);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 2px;
+  }
+}
+
+.contributors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.contributor-chip {
+  display: inline-block;
+  white-space: nowrap; // 👈 fix-ul principal
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  color: var(--text-primary, #ccc);
+}
+
+.contributor-link {
+  color: var(--accent-color, cyan);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: cyan;
   }
 }

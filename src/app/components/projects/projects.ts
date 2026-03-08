@@ -36,4 +36,8 @@ export class Projects implements OnInit {
           return dateB - dateA;
       });
   }
+  // Add this method to your Projects class
+isContributorLink(c: string | [string, string]): c is [string, string] {
+  return Array.isArray(c);
+}
 }
