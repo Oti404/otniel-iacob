@@ -23,7 +23,7 @@ export const academicData = {
     // =================================================================
     {
       name: "University Research Project: NLP in Finance",
-      description: "Research and development of AI solutions for financial text analysis (Sentiment Analysis). Focus on creating datasets and algorithms for predicting stock market trends.",
+      description: "Research and development of AI solutions for financial text analysis, specifically sentiment analysis. Focused on creating robust datasets and algorithms to predict stock market trends.",
       tech: "Python, NLP, Machine Learning, TensorFlow",
       contributors: [["Coord. Assist. Prof. Dr. BRICIU Anamaria", "https://www.linkedin.com/in/anamaria-briciu-626109101/"]],
       display: true,
@@ -32,7 +32,7 @@ export const academicData = {
     },
     {
       name: "Personal Portfolio (V2)",
-      description: "Current professional presentation platform. Includes automated CI/CD with GitHub Actions, Cyberpunk design, and modular Angular structure.",
+      description: "Current professional portfolio platform featuring a Cyberpunk-inspired design. Implements automated CI/CD pipelines via GitHub Actions and a modular Angular architecture.",
       tech: "Angular 17, TypeScript, SCSS, GitHub Actions",
       link: "https://github.com/Oti404/portofoliu-personal",
       liveLink: "https://oti404.github.io/portofoliu-personal/", // 🔴 LIVE
@@ -42,7 +42,7 @@ export const academicData = {
     },
     {
       name: "Smart City Parking System (Hackathon)",
-      description: "Digital solution for intelligent public parking management. The system automatically identifies cars using AI (OCR) and verifies subscriptions in real-time.",
+      description: "Digital solution for intelligent public parking management. Integrates AI-powered Optical Character Recognition (OCR) to automatically identify license plates and verify active subscriptions in real-time.",
       tech: "Angular, Python, AI (OCR)",
       contributors: [["Robert Hatos", "https://www.linkedin.com/in/robert-hatos-251598378/"], "Gabriel Pașca"],
       display: true,
@@ -51,9 +51,14 @@ export const academicData = {
     },
     {
       name: "WearWise (Innovation Labs 2026)",
-      description: "WearWise is an digital wardrobe platform that helps users organize their clothes, create outfits, and discover new style combinations from what they already own.",
-      tech: "Web/Frontend, React, Github, Vercel, Lovable, Buisness, Marketing",
-      contributors: [["Robert Hatos", "https://www.linkedin.com/in/robert-hatos-251598378/"], ["Gabriel Dumiter", "https://www.linkedin.com/in/george-dumiter-647a9a3b5/"], ["Carina Faur", "https://www.linkedin.com/in/carina-faur/"], ["Mara Dorhoi", "https://www.linkedin.com/in/mara-dorhoi-1a32033b5/"]],
+      description: "Digital wardrobe platform that helps users organize their clothing inventory, curate outfits, and discover new style combinations using existing wardrobe items.",
+      tech: "React, Web/Frontend, GitHub, Vercel, Lovable, Business, Marketing",
+      contributors: [
+        ["Robert Hatos", "https://www.linkedin.com/in/robert-hatos-251598378/"], 
+        ["Gabriel Dumiter", "https://www.linkedin.com/in/george-dumiter-647a9a3b5/"], 
+        ["Carina Faur", "https://www.linkedin.com/in/carina-faur/"], 
+        ["Mara Dorhoi", "https://www.linkedin.com/in/mara-dorhoi-1a32033b5/"]
+      ],
       display: true,
       date: "2026-03-08",
       status: "wip" as const
@@ -64,7 +69,7 @@ export const academicData = {
     // =================================================================
     {
       name: "Movie World (Globant Internship)",
-      description: "Complex movie streaming and cataloging application. Implemented advanced filters, secure authentication, and external API consumption.",
+      description: "Complex movie streaming and cataloging application. Features include advanced search filters, secure user authentication, and seamless integration with external APIs.",
       tech: "Angular, API Integration, RxJS",
       link: "https://github.com/Oti404/movie-world",
       liveLink: "https://oti404-movie-world.netlify.app/", // 🔴 LIVE
@@ -76,7 +81,7 @@ export const academicData = {
     },
     {
       name: "Car World (MHP Lab)",
-      description: "Car management platform developed under the coordination of MHP - A Porsche Company. Features include inventory management and a car configurator.",
+      description: "Car management platform developed under the mentorship of MHP - A Porsche Company. Key features include dynamic inventory management and an interactive car configurator.",
       tech: "Angular 16+, TypeScript, SCSS",
       link: "https://github.com/Oti404/car-world",
       liveLink: "https://oti404.github.io/car-world/", // 🔴 LIVE
@@ -88,7 +93,7 @@ export const academicData = {
     },
     {
       name: "2D Arrays Educational Platform",
-      description: "Educational project for the Professional Competence Certificate. An interactive platform for learning matrix algorithms and data structures.",
+      description: "Interactive educational platform designed for learning matrix algorithms and data structures, developed for the Professional Competence Certificate.",
       tech: "HTML, CSS, JavaScript, C++ (Algorithms)",
       link: "https://github.com/Oti404/website-tablouri_bidimensionale",
       liveLink: "https://oti404.github.io/website-tablouri_bidimensionale/", // 🔴 LIVE
