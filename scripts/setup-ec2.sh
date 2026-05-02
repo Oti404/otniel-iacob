@@ -24,3 +24,14 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo usermod -aG docker ubuntu
 
 echo "Docker installed successfully."
+
+# ─── SWAP SPACE ───────────────────────────────────────────────────────────────
+if [ ! -f /swapfile ]; then
+  echo "Creating 1GB swap space..."
+  sudo fallocate -l 1G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+  echo "Swap created."
+fi

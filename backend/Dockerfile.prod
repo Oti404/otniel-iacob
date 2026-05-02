@@ -2,7 +2,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY shared/package*.json ./shared/
+COPY database/package*.json ./database/
+COPY frontend/package*.json ./frontend/
+
+RUN npm install
+
 COPY . .
+
+RUN cd database && npx prisma generate --schema prisma/schema.prisma
 
 EXPOSE 3000
 

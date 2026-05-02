@@ -61,7 +61,7 @@ jobs:
 
       - name: Sync files to EC2
         run: |
-          rsync -az --exclude 'node_modules' --exclude '.git' --exclude 'database/data' \
+          rsync -az --delete --exclude 'node_modules' --exclude '.git' --exclude 'database/data' \
             -e "ssh -i ~/.ssh/ec2_key.pem" \
             ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app/
 
