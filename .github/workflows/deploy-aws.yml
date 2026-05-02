@@ -44,6 +44,21 @@ jobs:
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "chmod +x /tmp/setup-ec2.sh && sudo /tmp/setup-ec2.sh"
 
+      - name: Write .env on EC2
+        run: |
+          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
+            mkdir -p ~/app
+            cat > ~/app/.env << 'ENVEOF'
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          ALLOWED_ORIGINS=http://${{ secrets.EC2_HOST }}
+          ENVEOF
+          "
+
       - name: Sync files to EC2
         run: |
           rsync -az --exclude 'node_modules' --exclude '.git' --exclude 'database/data' \
@@ -57,11 +72,13 @@ jobs:
 
       - name: Run database migrations
         run: |
-          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
-            set -a && source ~/app/.env && set +a
+          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
+            DB_USER=$(grep "^POSTGRES_USER=" ~/app/.env | cut -d= -f2-)
+            DB_PASS=$(grep "^POSTGRES_PASSWORD=" ~/app/.env | cut -d= -f2-)
+            DB_NAME=$(grep "^POSTGRES_DB=" ~/app/.env | cut -d= -f2-)
             sudo docker run --rm --network monorepo-net \
-              -e DATABASE_URL=\"postgresql://\${POSTGRES_USER}:\${POSTGRES_PASSWORD}@postgres:5432/\${POSTGRES_DB}\" \
+              -e DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@postgres:5432/${DB_NAME}" \
               -v ~/app/database:/app/database \
               node:20-alpine \
-              sh -c 'cd /app/database && npm install --silent && npx prisma migrate deploy --schema prisma/schema.prisma'
-          "
+              sh -c "cd /app/database && npm install --silent && npx prisma migrate deploy --schema prisma/schema.prisma"
+          '
