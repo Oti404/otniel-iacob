@@ -68,9 +68,4 @@ jobs:
       - name: Deploy with Docker Compose
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
-            "cd ~/app && sudo docker compose -f docker-compose.prod.yml up -d --build"
-
-      - name: Run database migrations
-        run: |
-          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
-            "sudo docker exec app-backend-1 sh -c 'cd /app/database && npx prisma migrate deploy --schema prisma/schema.prisma'"
+            "cd ~/app && sudo docker compose -f docker-compose.prod.yml up -d --build --remove-orphans"
