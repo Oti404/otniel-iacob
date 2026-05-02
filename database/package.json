@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "main": "index.ts",
   "types": "index.ts",
+  "scripts": {
+    "seed": "ts-node seed.ts",
+    "migrate": "docker run --rm --network monorepo-net -e DATABASE_URL=postgresql://admin:admin@postgres:5432/monorepodb -v %cd%/..:/app node:20-alpine sh -c \"cd /app/database && npx prisma migrate dev --schema prisma/schema.prisma\"",
+    "seed:docker": "docker run --rm --network monorepo-net -e DATABASE_URL=postgresql://admin:admin@postgres:5432/monorepodb -e ADMIN_PASSWORD=%ADMIN_PASSWORD% -v %cd%/..:/app node:20-alpine sh -c \"cd /app/database && npm run seed\""
+  },
   "dependencies": {
-    "@prisma/client": "^6.4.1"
+    "@prisma/client": "^6.19.3",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
-    "prisma": "^7.8.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^7.8.0"
+    "@types/node": "^25.6.0",
+    "prisma": "^6.19.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   }
 }

@@ -8,6 +8,7 @@ networks:
 volumes:
   n8n_data:
   db_data:
+  uploads_data:
 
 services:
   postgres:
@@ -21,33 +22,6 @@ services:
       - monorepo-net
     volumes:
       - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  n8n:
-    image: docker.n8n.io/n8nio/n8n
-    restart: always
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - NODE_ENV=production
-      - WEBHOOK_URL=http://localhost:5678/
-      - GENERIC_TIMEZONE=Europe/Bucharest
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-monorepodb}
-      - DB_POSTGRESDB_USER=${POSTGRES_USER:-admin}
-      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-admin}
-    networks:
-      - monorepo-net
-    volumes:
-      - n8n_data:/home/node/.n8n
-    depends_on:
-      - postgres
 
   backend:
     build:
@@ -55,11 +29,19 @@ services:
       dockerfile: backend/Dockerfile.prod
     restart: always
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - PORT=3000
+      - UPLOADS_DIR=/app/uploads
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@postgres:5432/${POSTGRES_DB:-monorepodb}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     networks:
       - monorepo-net
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       - postgres
 

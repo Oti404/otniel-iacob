@@ -1,0 +1,86 @@
+<div class="admin-page-header">
+  <h1 class="admin-title">> PROFILE_DATA_UPLOAD</h1>
+  <p class="admin-subtitle">Update your personal information, avatar, and CV.</p>
+</div>
+
+<div class="admin-card" *ngIf="!loading">
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="admin-form">
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" formControlName="name" class="admin-input" placeholder="Your Name" />
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <input type="text" formControlName="role" class="admin-input" placeholder="Your Title/Role" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea formControlName="description" class="admin-input" rows="4" placeholder="About you..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" class="admin-input" placeholder="email@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" formControlName="location" class="admin-input" placeholder="City, Country" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>LinkedIn URL</label>
+        <input type="text" formControlName="linkedin" class="admin-input" placeholder="https://linkedin.com/in/..." />
+      </div>
+      <div class="form-group">
+        <label>GitHub URL</label>
+        <input type="text" formControlName="github" class="admin-input" placeholder="https://github.com/..." />
+      </div>
+    </div>
+
+    <div class="uploads-section">
+      <h3 class="section-title">Media & Documents</h3>
+      <div class="uploads-grid">
+        <app-file-upload 
+          label="Profile Photo" 
+          accept="image/*" 
+          [currentUrl]="profileForm.get('photo')?.value" 
+          (uploaded)="onPhotoUploaded($event)">
+        </app-file-upload>
+        
+        <app-file-upload 
+          label="Avatar (Small)" 
+          accept="image/*" 
+          [currentUrl]="profileForm.get('avatar')?.value" 
+          (uploaded)="onAvatarUploaded($event)">
+        </app-file-upload>
+
+        <app-file-upload 
+          label="CV Document (PDF)" 
+          accept=".pdf" 
+          [currentUrl]="profileForm.get('cvPdf')?.value" 
+          (uploaded)="onCvUploaded($event)">
+        </app-file-upload>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || saving">
+        {{ saving ? 'SAVING...' : 'SAVE CHANGES' }}
+      </button>
+      <span class="success-message" *ngIf="successMessage">{{ successMessage }}</span>
+      <span class="error-message" *ngIf="errorMessage">{{ errorMessage }}</span>
+    </div>
+
+  </form>
+</div>
+
+<div class="loading-state" *ngIf="loading">
+  LOADING PROFILE DATA...
+</div>

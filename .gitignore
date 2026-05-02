@@ -18,6 +18,12 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+.claude/
+.agent/
+.antigravity/
+.cursor/
+.gemini/
+
 
 # Docker
 docker-compose.override.yml

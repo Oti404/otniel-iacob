@@ -8,6 +8,7 @@ networks:
 volumes:
   n8n_data:
   db_data:
+  uploads_data:
 
 services:
   postgres:
@@ -22,7 +23,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   n8n:
     image: docker.n8n.io/n8nio/n8n
@@ -51,20 +52,30 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     restart: always
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
+      - UPLOADS_DIR=/app/uploads
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@postgres:5432/${POSTGRES_DB:-monorepodb}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    env_file:
+      - .env
     networks:
       - monorepo-net
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       - postgres
 
   frontend:
     build:
-      context: ./frontend
+      context: .
+      dockerfile: frontend/Dockerfile
     restart: always
     ports:
       - "80:80"

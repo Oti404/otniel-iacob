@@ -1,0 +1,26 @@
+<div class="file-upload">
+  <label class="upload-label">{{ label }}</label>
+  
+  <div class="preview-container" *ngIf="currentUrl">
+    <img *ngIf="isImage()" [src]="currentUrl" alt="Preview" class="preview-image" />
+    <div *ngIf="!isImage()" class="preview-document">
+      <span class="doc-icon">📄</span>
+      <a [href]="currentUrl" target="_blank" class="doc-link">View File</a>
+    </div>
+  </div>
+
+  <div class="upload-controls">
+    <button type="button" class="btn btn-secondary upload-btn" (click)="fileInput.click()" [disabled]="uploading">
+      {{ uploading ? 'Uploading...' : (currentUrl ? 'Change File' : 'Choose File') }}
+    </button>
+    <input 
+      type="file" 
+      #fileInput 
+      [accept]="accept" 
+      (change)="onFileChange($event)" 
+      style="display: none" 
+    />
+  </div>
+
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+</div>

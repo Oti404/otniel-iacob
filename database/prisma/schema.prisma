@@ -1,18 +1,113 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── AUTH ────────────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── CONTENT ─────────────────────────────────────────────────────────────────
+
+model Profile {
+  id          Int    @id @default(autoincrement())
+  name        String
+  role        String
+  description String
+  photo       String
+  avatar      String
+  cvPdf       String
+  location    String
+  email       String
+  linkedin    String
+  github      String
+}
+
+model Project {
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String
+  tech         String
+  link         String?
+  liveLink     String?
+  contributors Json?
+  awards       String?
+  display      Boolean       @default(true)
+  date         DateTime
+  endDate      DateTime?
+  status       ProjectStatus
+  order        Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Experience {
+  id          Int            @id @default(autoincrement())
+  company     String
+  role        String
+  startDate   DateTime
+  endDate     DateTime?
+  description Json
+  tech        String
+  type        ExperienceType
+  order       Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Semester {
+  id       String    @id
+  name     String
+  order    Int
+  subjects Subject[]
+}
+
+model Subject {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String
+  passed     Boolean  @default(false)
+  credits    Int
+  docPath    String?
+  semesterId String
+  semester   Semester @relation(fields: [semesterId], references: [id])
+}
+
+model Hobby {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  icon        String
+  link        String
+  order       Int    @default(0)
 }
 
 model HealthCheck {
   id        Int      @id @default(autoincrement())
   status    String
   timestamp DateTime @default(now())
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum ProjectStatus {
+  completed
+  wip
+  archived
+}
+
+enum ExperienceType {
+  job
+  education
+  event
 }

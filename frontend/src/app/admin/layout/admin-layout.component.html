@@ -1,0 +1,46 @@
+<div class="admin-shell admin-root">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-bracket">[</span>
+      ADMIN
+      <span class="logo-bracket">]</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/admin/profile" routerLinkActive="active">
+        <span class="nav-icon">◈</span> PROFILE
+      </a>
+      <a routerLink="/admin/projects" routerLinkActive="active">
+        <span class="nav-icon">◈</span> PROJECTS
+      </a>
+      <a routerLink="/admin/experience" routerLinkActive="active">
+        <span class="nav-icon">◈</span> EXPERIENCE
+      </a>
+      <a routerLink="/admin/hobbies" routerLinkActive="active">
+        <span class="nav-icon">◈</span> HOBBIES
+      </a>
+      <a routerLink="/admin/semesters" routerLinkActive="active">
+        <span class="nav-icon">◈</span> SEMESTERS
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="sidebar-email">{{ email }}</span>
+      <button class="admin-btn admin-btn-danger admin-btn-sm" (click)="logout()">
+        LOGOUT
+      </button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <span class="topbar-title">> ADMIN_PANEL.EXE</span>
+      <span class="topbar-status">● ONLINE</span>
+    </header>
+    <div class="admin-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+</div>

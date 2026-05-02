@@ -19,7 +19,7 @@
         </ul>
       </div>
 
-      <div class="footer-social">
+      <div class="footer-social" *ngIf="profile">
         <h3>CONNECT</h3>
         <div class="social-icons">
           <a [href]="profile.linkedin" target="_blank" aria-label="LinkedIn">
@@ -37,7 +37,7 @@
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; {{ currentYear }} {{ profile.name }}. All rights reserved.</p>
+      <p>&copy; {{ currentYear }} {{ profile?.name }}. All rights reserved.</p>
 
       <button (click)="scrollToTop()" class="scroll-top-btn">
         ▲ TOP

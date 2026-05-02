@@ -1,70 +1,52 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataService } from '../../services/data'; // Asigură-te că calea e corectă
+import { ContentService } from '../../services/content.service';
+import { Profile } from '@monorepo/shared';
+
+interface DetailBlock {
+  type: string;
+  icon: string;
+  label: string;
+  value: string;
+  displayValue: string;
+}
 
 @Component({
   selector: 'app-about',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './about.html',
-  styleUrl: './about.scss'
+  styleUrl: './about.scss',
 })
-export class About {
-  // 1. Injectăm Serviciul
-  private dataService = inject(DataService);
+export class About implements OnInit {
+  profile: Profile | null = null;
+  details: DetailBlock[] = [];
+  loading = true;
 
-  // 2. Extragem profilul pentru a-l folosi ușor în HTML (pentru poză și descriere)
-  public profile = this.dataService.data.profile;
+  constructor(private content: ContentService) {}
 
-  // 3. Construim lista de "Data Blocks" folosind datele din serviciu
-  public details = [
-    {
-      type: 'link',
-      icon: 'linkedin',
-      label: 'LinkedIn',
-      value: this.profile.linkedin,
-      displayValue: ' otniel-iacob' // Putem formata textul manual sau îl lăsăm fix
-    },
-    {
-      type: 'link',
-      icon: 'github',
-      label: 'GitHub',
-      value: this.profile.github,
-      displayValue: ' Oti404'
-    },
-    {
-      type: 'info',
-      icon: 'email',
-      label: 'Email',
-      value: `mailto:${this.profile.email}`, // "mailto:" face link-ul să deschidă aplicația de mail
-      displayValue: this.profile.email
-    },
-    {
-      type: 'info',
-      icon: 'location',
-      label: 'Location',
-      value: '#',
-      displayValue: this.profile.location
-    },
-    // Putem adăuga și link-ul către CV dacă vrei un buton special
-    {
-      type: 'link',
-      icon: 'cv',
-      label: 'Resume / CV',
-      value: this.profile.cvPdf,
-      displayValue: 'Download PDF'
-    }
-  ];
+  ngOnInit() {
+    this.content.getProfile().subscribe({
+      next: (p) => {
+        if (!p) return;
+        this.profile = p;
+        this.details = [
+          { type: 'link', icon: 'linkedin', label: 'LinkedIn', value: p.linkedin, displayValue: ' otniel-iacob' },
+          { type: 'link', icon: 'github', label: 'GitHub', value: p.github, displayValue: ' Oti404' },
+          { type: 'info', icon: 'email', label: 'Email', value: `mailto:${p.email}`, displayValue: p.email },
+          { type: 'info', icon: 'location', label: 'Location', value: '#', displayValue: p.location },
+          { type: 'link', icon: 'cv', label: 'Resume / CV', value: p.cvPdf, displayValue: 'Download PDF' },
+        ];
+        this.loading = false;
+      },
+      error: () => { this.loading = false; },
+    });
+  }
 
-  // Helper pentru iconițe
   getIcon(iconName: string): string {
-    const icons: any = {
-      linkedin: '💼',
-      github: '👾',
-      email: '✉️',
-      location: '📍',
-      cv: '📄'
+    const icons: Record<string, string> = {
+      linkedin: '💼', github: '👾', email: '✉️', location: '📍', cv: '📄',
     };
-    return icons[iconName] || '🔹';
+    return icons[iconName] ?? '🔹';
   }
 }

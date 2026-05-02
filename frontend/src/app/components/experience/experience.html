@@ -10,7 +10,7 @@
         <div class="header">
           <h3 class="role">{{ job.role }}</h3>
           <span class="company">@ {{ job.company }}</span>
-          <span class="period">{{ job.period }}</span>
+          <span class="period">{{ formatPeriod(job) }}</span>
         </div>
 
         <ul class="description-list">

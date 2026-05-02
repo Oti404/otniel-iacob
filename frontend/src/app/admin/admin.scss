@@ -1,0 +1,287 @@
+/* Admin Panel — Cyberpunk Design Tokens */
+:root {
+  --admin-bg: #0a0a0f;
+  --admin-surface: #111118;
+  --admin-surface-2: #1a1a26;
+  --admin-border: #2a2a3a;
+  --admin-neon: #00ffcc;
+  --admin-neon-dim: rgba(0, 255, 204, 0.15);
+  --admin-neon-glow: 0 0 8px rgba(0, 255, 204, 0.5);
+  --admin-accent: #ff00aa;
+  --admin-accent-dim: rgba(255, 0, 170, 0.15);
+  --admin-text: #e0e0f0;
+  --admin-text-muted: #6a6a8a;
+  --admin-danger: #ff3355;
+  --admin-success: #00ffcc;
+  --admin-warning: #ffaa00;
+  --admin-font: 'Courier New', 'Consolas', monospace;
+  --admin-radius: 4px;
+  --admin-transition: 0.15s ease;
+}
+
+/* Base reset for admin scope */
+.admin-root {
+  font-family: var(--admin-font);
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  min-height: 100vh;
+  font-size: 13px;
+}
+
+/* Inputs */
+.admin-input,
+.admin-select,
+.admin-textarea {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  font-family: var(--admin-font);
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: var(--admin-radius);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--admin-transition), box-shadow var(--admin-transition);
+
+  &:focus {
+    border-color: var(--admin-neon);
+    box-shadow: var(--admin-neon-glow);
+  }
+
+  &::placeholder {
+    color: var(--admin-text-muted);
+  }
+}
+
+.admin-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Buttons */
+.admin-btn {
+  font-family: var(--admin-font);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: var(--admin-radius);
+  border: 1px solid var(--admin-neon);
+  background: transparent;
+  color: var(--admin-neon);
+  cursor: pointer;
+  transition: all var(--admin-transition);
+
+  &:hover {
+    background: var(--admin-neon-dim);
+    box-shadow: var(--admin-neon-glow);
+  }
+
+  &.admin-btn-primary {
+    background: var(--admin-neon-dim);
+    border-color: var(--admin-neon);
+  }
+
+  &.admin-btn-danger {
+    border-color: var(--admin-danger);
+    color: var(--admin-danger);
+    &:hover { background: rgba(255, 51, 85, 0.15); }
+  }
+
+  &.admin-btn-accent {
+    border-color: var(--admin-accent);
+    color: var(--admin-accent);
+    &:hover { background: var(--admin-accent-dim); }
+  }
+
+  &.admin-btn-sm {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* Cards */
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 16px;
+}
+
+/* Table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--admin-border);
+  }
+
+  th {
+    color: var(--admin-neon);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--admin-surface-2);
+  }
+
+  tr:hover td {
+    background: var(--admin-surface-2);
+  }
+}
+
+/* Form groups */
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.admin-label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--admin-neon);
+}
+
+/* Status badges */
+.admin-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: bold;
+
+  &.badge-completed { color: var(--admin-success); border: 1px solid var(--admin-success); }
+  &.badge-wip { color: var(--admin-warning); border: 1px solid var(--admin-warning); }
+  &.badge-archived { color: var(--admin-text-muted); border: 1px solid var(--admin-text-muted); }
+  &.badge-job { color: var(--admin-neon); border: 1px solid var(--admin-neon); }
+  &.badge-education { color: var(--admin-accent); border: 1px solid var(--admin-accent); }
+  &.badge-event { color: var(--admin-warning); border: 1px solid var(--admin-warning); }
+  &.badge-on { color: var(--admin-success); border: 1px solid var(--admin-success); }
+  &.badge-off { color: var(--admin-text-muted); border: 1px solid var(--admin-text-muted); }
+}
+
+/* Section header */
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--admin-border);
+
+  h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--admin-neon);
+    margin: 0;
+
+    &::before { content: '> '; opacity: 0.6; }
+  }
+}
+
+/* Notifications */
+.admin-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: var(--admin-radius);
+  font-size: 12px;
+  letter-spacing: 1px;
+  z-index: 9999;
+  animation: slideIn 0.2s ease;
+
+  &.toast-success {
+    background: rgba(0, 255, 204, 0.15);
+    border: 1px solid var(--admin-neon);
+    color: var(--admin-neon);
+  }
+
+  &.toast-error {
+    background: rgba(255, 51, 85, 0.15);
+    border: 1px solid var(--admin-danger);
+    color: var(--admin-danger);
+  }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Checkbox */
+.admin-checkbox {
+  accent-color: var(--admin-neon);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Inline actions (order buttons) */
+.admin-order-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  button {
+    background: none;
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-muted);
+    padding: 2px 6px;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 2px;
+    line-height: 1;
+    transition: all var(--admin-transition);
+
+    &:hover {
+      border-color: var(--admin-neon);
+      color: var(--admin-neon);
+    }
+
+    &:disabled { opacity: 0.2; cursor: not-allowed; }
+  }
+}
+
+/* Confirmation inline */
+.admin-confirm-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--admin-danger);
+}
+
+/* Dynamic list items */
+.admin-dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .dynamic-item {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+
+    input { flex: 1; }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+}

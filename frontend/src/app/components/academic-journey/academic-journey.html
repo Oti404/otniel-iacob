@@ -9,9 +9,9 @@
 
     <nav class="academic-sidebar">
       <li *ngFor="let sem of academicData">
-        <a (click)="selectSemester(sem)" [class.active]="activeSemester.id === sem.id">
+        <a (click)="selectSemester(sem)" [class.active]="activeSemester?.id === sem.id">
           <span class="icon-bracket">[</span>
-          {{ sem.semester }}
+          {{ sem.name }}
           <span class="icon-bracket">]</span>
         </a>
       </li>
@@ -20,7 +20,7 @@
     <main class="academic-content">
       <div class="semester-section fade-in" *ngIf="activeSemester">
         <h2 class="semester-divider">
-          <span>{{ activeSemester.semester }}</span>
+          <span>{{ activeSemester.name }}</span>
           <div class="stats-badge">{{ activeSemester.subjects.length }} MODULE</div>
         </h2>
 
@@ -34,7 +34,9 @@
       </div>
     </main>
 
-  </div> <app-subject-details-modal
+  </div>
+
+  <app-subject-details-modal
     *ngIf="selectedSubject"
     [subject]="selectedSubject"
     (close)="closeModal()">

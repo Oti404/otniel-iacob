@@ -1,22 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataService } from '../../services/data'; // Asigură-te că calea e corectă
+import { ContentService } from '../../services/content.service';
+import { Profile } from '@monorepo/shared';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './footer.html',
-  styleUrls: ['./footer.scss']
+  styleUrls: ['./footer.scss'],
 })
-export class Footer {
-  profile: any; // Aici vom stoca datele profilului
+export class Footer implements OnInit {
+  profile: Profile | null = null;
   currentYear = new Date().getFullYear();
 
-  // 1. Injectăm serviciul în constructor
-  constructor(private dataService: DataService) {
-    // 2. Extragem datele din instanța serviciului
-    this.profile = this.dataService.data.profile;
+  constructor(private content: ContentService) {}
+
+  ngOnInit() {
+    this.content.getProfile().subscribe({
+      next: (p) => { this.profile = p; },
+    });
   }
 
   scrollToTop() {

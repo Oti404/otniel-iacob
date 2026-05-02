@@ -1,15 +1,23 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NgOptimizedImage } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { ContentService } from '../../services/content.service';
+import { Profile } from '@monorepo/shared';
+
 @Component({
   selector: 'app-home',
   standalone: true,
-  // --- ADAUGĂ-LE ÎN LISTA DE IMPORTS ---
-  imports: [
-    CommonModule,
-    NgOptimizedImage  ],
+  imports: [CommonModule, NgOptimizedImage],
   templateUrl: './home.html',
-  styleUrl: './home.scss'
+  styleUrl: './home.scss',
 })
-export class Home {
+export class Home implements OnInit {
+  profile: Profile | null = null;
+
+  constructor(private content: ContentService) {}
+
+  ngOnInit() {
+    this.content.getProfile().subscribe({
+      next: (p) => { this.profile = p; },
+    });
+  }
 }

@@ -1,20 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { RouterOutlet } from '@angular/router';
 import { HealthStatus } from '@monorepo/shared';
-import { Navbar } from './components/navbar/navbar';
-import { Home } from './components/home/home';
-import { Projects } from './components/projects/projects';
-import { Hobbies } from './components/hobbies/hobbies';
-import { ExperienceComponent } from './components/experience/experience';
-import { NgOptimizedImage } from '@angular/common';
-import { About } from './components/about/about';
-import { AcademicJourneyComponent } from './components/academic-journey/academic-journey';
-import { Footer } from './components/footer/footer';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [Navbar, Home, Projects,ExperienceComponent, Footer , About],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

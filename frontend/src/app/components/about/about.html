@@ -1,5 +1,5 @@
 <section class="about-section" id="about">
-  <div class="container">
+  <div class="container" *ngIf="profile; else loading">
 
     <div class="profile-container">
       <div class="profile-glow"></div>
@@ -37,4 +37,5 @@
     </div>
 
   </div>
+  <ng-template #loading></ng-template>
 </section>

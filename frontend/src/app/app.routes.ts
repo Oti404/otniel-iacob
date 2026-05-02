@@ -1,22 +1,12 @@
-// ...existing code...
 import { Routes } from '@angular/router';
-import { Home } from './components/home/home';
-import { Projects } from './components/projects/projects';
-import { Hobbies } from './components/hobbies/hobbies';
-import { AcademicJourneyComponent } from './components/academic-journey/academic-journey';
-import { ExperienceComponent } from './components/experience/experience';
-import { About } from './components/about/about';
-import { Footer } from './components/footer/footer';
-// ...existing code...
+import { PortfolioComponent } from './components/portfolio/portfolio.component';
+
 export const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: Home },
-  { path: 'projects', component: Projects },
-  { path: 'hobbies', component: Hobbies },
-  { path: 'about-me', component: About },
-  { path: 'academic-journey', component: AcademicJourneyComponent },
-  { path: 'experience', component: ExperienceComponent },
-  { path: 'academic-journey', component: AcademicJourneyComponent },
-  { path: 'footer', component: Footer },
-  { path: '**', redirectTo: '/home' }
+  { path: '', component: PortfolioComponent },
+  { path: 'home', redirectTo: '', pathMatch: 'full' },
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.routes').then((m) => m.adminRoutes),
+  },
+  { path: '**', redirectTo: '' },
 ];

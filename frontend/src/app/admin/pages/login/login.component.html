@@ -1,0 +1,45 @@
+<div class="login-shell admin-root">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-prefix">></div>
+      <h1>ADMIN_PANEL<span class="blink">_</span></h1>
+    </div>
+    <div class="login-subtitle">AUTHENTICATION REQUIRED</div>
+
+    <form class="login-form" (ngSubmit)="submit()">
+      <div class="admin-form-group">
+        <label class="admin-label">EMAIL</label>
+        <input
+          class="admin-input"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="user@domain.com"
+        />
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-label">PASSWORD</label>
+        <input
+          class="admin-input"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+          autocomplete="current-password"
+          placeholder="••••••••"
+        />
+      </div>
+
+      @if (error) {
+        <div class="login-error">⚠ {{ error }}</div>
+      }
+
+      <button class="admin-btn admin-btn-primary login-btn" type="submit" [disabled]="loading">
+        {{ loading ? 'AUTHENTICATING...' : 'LOGIN' }}
+      </button>
+    </form>
+  </div>
+</div>

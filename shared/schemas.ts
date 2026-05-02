@@ -1,0 +1,73 @@
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export const profileSchema = z.object({
+  name: z.string().min(1),
+  role: z.string().min(1),
+  description: z.string().min(1),
+  photo: z.string().min(1),
+  avatar: z.string().min(1),
+  cvPdf: z.string().min(1),
+  location: z.string().min(1),
+  email: z.string().email(),
+  linkedin: z.string().url(),
+  github: z.string().url(),
+});
+
+const contributorSchema = z.union([
+  z.string(),
+  z.tuple([z.string(), z.string().url()]),
+]);
+
+export const projectSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  tech: z.string().min(1),
+  link: z.string().url().nullable().optional(),
+  liveLink: z.string().url().nullable().optional(),
+  contributors: z.array(contributorSchema).nullable().optional(),
+  awards: z.string().nullable().optional(),
+  display: z.boolean(),
+  date: z.string().datetime(),
+  endDate: z.string().datetime().nullable().optional(),
+  status: z.enum(['completed', 'wip', 'archived']),
+  order: z.number().int().default(0),
+});
+
+export const experienceSchema = z.object({
+  company: z.string().min(1),
+  role: z.string().min(1),
+  startDate: z.string().datetime(),
+  endDate: z.string().datetime().nullable().optional(),
+  description: z.array(z.string()).min(1),
+  tech: z.string().min(1),
+  type: z.enum(['job', 'education', 'event']),
+  order: z.number().int().default(0),
+});
+
+export const semesterSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  order: z.number().int(),
+});
+
+export const subjectSchema = z.object({
+  code: z.string().min(1),
+  name: z.string().min(1),
+  passed: z.boolean(),
+  credits: z.number().int().min(1),
+  docPath: z.string().nullable().optional(),
+  semesterId: z.string().min(1),
+});
+
+export const hobbySchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  icon: z.string().min(1),
+  link: z.string().min(1),
+  order: z.number().int().default(0),
+});

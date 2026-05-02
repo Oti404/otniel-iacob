@@ -2,5 +2,8 @@
   "name": "@monorepo/shared",
   "version": "1.0.0",
   "main": "index.ts",
-  "types": "index.ts"
+  "types": "index.ts",
+  "dependencies": {
+    "zod": "^3.25.20"
+  }
 }
