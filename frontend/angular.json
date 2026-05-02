@@ -68,7 +68,8 @@
               "buildTarget": "portofoliu-personal:build:production"
             },
             "development": {
-              "buildTarget": "portofoliu-personal:build:development"
+              "buildTarget": "portofoliu-personal:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

@@ -1,0 +1,51 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build Frontend (Angular)
+        working-directory: ./frontend
+        run: npm run build -- --configuration production
+
+      - name: Configure SSH Private Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Run Setup Script on EC2
+        run: |
+          # Copy setup script to EC2
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key.pem ./scripts/setup-ec2.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/setup-ec2.sh
+          # Execute setup script
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "chmod +x /tmp/setup-ec2.sh && sudo /tmp/setup-ec2.sh"
+
+      - name: Sync Files to EC2
+        run: |
+          # Use rsync to copy all files to ~/app directory on EC2, excluding node_modules and git folders
+          rsync -avz --exclude 'node_modules' --exclude '.git' --exclude 'database/data' -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key.pem" ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app/
+
+      - name: Start Docker Compose on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "cd ~/app && sudo docker compose -f docker-compose.prod.yml up -d --build"

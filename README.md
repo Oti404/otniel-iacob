@@ -1,5 +1,19 @@
 # PortofoliuPersonal
 
+**Welcome to my personal portfolio project.** While its primary purpose is to serve as a personal website, it has been built as a highly advanced technical sandbox to demonstrate enterprise-grade architecture, strict AI-assisted development workflows, and DevSecOps practices.
+
+> **⚠️ IMPORTANT ARCHITECTURE NOTE**
+> This is not a standard Angular application. This project is a **Monorepo Ecosystem** designed for an AI-assisted development workflow (incorporating Angular, n8n, Node/Python, PostgreSQL + Prisma ORM, and AWS). 
+> 
+> **To understand what this project actually is and how it works, you MUST read the documentation in the `docs/` folder:**
+> - 🤖 [`docs/AGENTS.md`](./docs/AGENTS.md) - The Chain of Command for AI Agents
+> - 🏗️ [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) - Project Directory Structure
+> - 🚀 [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) - Deployment and Operations
+> 
+> Please inspect all `.md` files in the `docs/` directory before proceeding.
+
+---
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
 
 ## Development server

@@ -1,0 +1,17 @@
+# Node modules
+node_modules/
+
+# Compiled output
+/dist
+/build
+/out-tsc
+
+# Coverage and testing
+/coverage
+/.nyc_output
+*.log
+
+# Environment variables
+.env
+.env.*
+!.env.example

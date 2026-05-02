@@ -1,0 +1,10 @@
+# Node modules
+node_modules/
+
+# Playwright / Cypress / E2E test results
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/blob-report/
+/cypress/videos/
+/cypress/screenshots/

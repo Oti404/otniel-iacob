@@ -1,0 +1,13 @@
+# Local database volumes and data
+/data
+/postgres-data
+/pgdata
+/mysql-data
+
+# Backups and dumps
+*.sql.gz
+*.sqlite
+*.db
+*.bak
+
+/generated/prisma
