@@ -72,13 +72,5 @@ jobs:
 
       - name: Run database migrations
         run: |
-          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
-            DB_USER=$(grep "^POSTGRES_USER=" ~/app/.env | cut -d= -f2-)
-            DB_PASS=$(grep "^POSTGRES_PASSWORD=" ~/app/.env | cut -d= -f2-)
-            DB_NAME=$(grep "^POSTGRES_DB=" ~/app/.env | cut -d= -f2-)
-            sudo docker run --rm --network monorepo-net \
-              -e DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@postgres:5432/${DB_NAME}" \
-              -v ~/app/database:/app/database \
-              node:20-alpine \
-              sh -c "cd /app/database && npm install --silent && npx prisma migrate deploy --schema prisma/schema.prisma"
-          '
+          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
+            "sudo docker exec app-backend-1 sh -c 'cd /app/database && npx prisma migrate deploy --schema prisma/schema.prisma'"
