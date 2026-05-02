@@ -19,13 +19,11 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Install Frontend Dependencies
-        working-directory: ./frontend
+      - name: Install All Dependencies
         run: npm ci
 
-      - name: Build Frontend (Angular)
-        working-directory: ./frontend
-        run: npm run build -- --configuration production
+      - name: Build All Workspaces
+        run: npm run build:all
 
       - name: Configure SSH Private Key
         run: |
@@ -43,8 +41,8 @@ jobs:
 
       - name: Sync Files to EC2
         run: |
-          # Use rsync to copy all files to ~/app directory on EC2, excluding node_modules and git folders
-          rsync -avz --exclude 'node_modules' --exclude '.git' --exclude 'database/data' -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key.pem" ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app/
+          # Use rsync to copy all files to ~/app directory on EC2. Exclude frontend/node_modules to save space.
+          rsync -avz --exclude 'frontend/node_modules' --exclude '.git' --exclude 'database/data' -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key.pem" ./ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app/
 
       - name: Start Docker Compose on EC2
         run: |
