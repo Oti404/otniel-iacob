@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ContentService } from '../../../services/content.service';
@@ -22,6 +22,7 @@ export class ProfileEditorComponent implements OnInit {
   private fb = inject(FormBuilder);
   private contentService = inject(ContentService);
   private adminDataService = inject(AdminDataService);
+  private cdr = inject(ChangeDetectorRef);
 
   profileForm!: FormGroup;
   loading = true;
@@ -34,6 +35,9 @@ export class ProfileEditorComponent implements OnInit {
       name: ['', Validators.required],
       role: ['', Validators.required],
       description: ['', Validators.required],
+      headline: [''],
+      quote: [''],
+      quoteAuthor: [''],
       location: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       linkedin: ['', urlValidator],
@@ -49,12 +53,16 @@ export class ProfileEditorComponent implements OnInit {
   loadProfile(): void {
     this.contentService.getProfile().subscribe({
       next: (profile) => {
-        this.profileForm.patchValue(profile);
+        if (profile) {
+          this.profileForm.patchValue(profile);
+        }
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Failed to load profile data.';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -83,9 +91,9 @@ export class ProfileEditorComponent implements OnInit {
 
     this.adminDataService.updateProfile(this.profileForm.value).subscribe({
       next: (profile) => {
+        this.saving = false;
         this.profileForm.patchValue(profile);
         this.successMessage = 'Profile updated successfully!';
-        this.saving = false;
         setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err) => {

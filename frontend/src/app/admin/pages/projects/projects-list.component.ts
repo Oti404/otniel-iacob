@@ -1,6 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ContentService } from '../../../services/content.service';
 import { AdminDataService } from '../../services/admin-data.service';
 import { Project } from '@monorepo/shared';
@@ -19,7 +20,7 @@ import { Project } from '@monorepo/shared';
       <table class="admin-table">
         <thead>
           <tr>
-            <th>Order</th>
+            <th style="width:32px;"></th>
             <th>Name</th>
             <th>Status</th>
             <th>Display</th>
@@ -28,13 +29,15 @@ import { Project } from '@monorepo/shared';
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of projects; let i = index">
-            <td>
-              <div class="admin-order-btns">
-                <button (click)="move(p, -1)" [disabled]="i === 0">▲</button>
-                <button (click)="move(p, 1)" [disabled]="i === projects.length - 1">▼</button>
-              </div>
-            </td>
+          <tr *ngFor="let p of projects; let i = index"
+              draggable="true"
+              (dragstart)="onDragStart(i)"
+              (dragover)="onDragOver($event, i)"
+              (drop)="onDrop(i)"
+              (dragend)="dragOverIndex = null"
+              [class.drag-over]="dragOverIndex === i"
+              style="cursor: grab;">
+            <td style="color:#555; font-size:18px; user-select:none;">⠿</td>
             <td><strong>{{ p.name }}</strong></td>
             <td><span class="admin-badge badge-{{ p.status }}">{{ p.status }}</span></td>
             <td>
@@ -49,7 +52,7 @@ import { Project } from '@monorepo/shared';
                 <button class="admin-btn admin-btn-sm admin-btn-danger" style="margin-left:8px;" (click)="confirmDeleteId = p.id">Del</button>
               </div>
               <div class="admin-confirm-row" *ngIf="confirmDeleteId === p.id">
-                Sure? 
+                Sure?
                 <button class="admin-btn admin-btn-sm admin-btn-danger" (click)="deleteProject(p.id)">Yes</button>
                 <button class="admin-btn admin-btn-sm" (click)="confirmDeleteId = null">No</button>
               </div>
@@ -58,40 +61,65 @@ import { Project } from '@monorepo/shared';
         </tbody>
       </table>
     </div>
-    
+
     <ng-template #empty>
       <div class="admin-card">No projects found. Add one!</div>
     </ng-template>
 
     <div class="admin-toast toast-success" *ngIf="toastMsg">{{ toastMsg }}</div>
   `,
+  styles: [`
+    tr.drag-over td { background: rgba(0,255,170,0.08); }
+  `],
 })
 export class ProjectsListComponent implements OnInit {
   contentService = inject(ContentService);
   adminDataService = inject(AdminDataService);
-  
+  cdr = inject(ChangeDetectorRef);
+
   projects: Project[] = [];
   confirmDeleteId: number | null = null;
   toastMsg = '';
+  dragIndex: number | null = null;
+  dragOverIndex: number | null = null;
 
-  ngOnInit() {
-    this.load();
-  }
+  ngOnInit() { this.load(); }
 
   load() {
     this.contentService.getProjects().subscribe(data => {
       this.projects = data.sort((a, b) => a.order - b.order);
+      this.cdr.detectChanges();
     });
   }
 
   showToast(msg: string) {
     this.toastMsg = msg;
-    setTimeout(() => this.toastMsg = '', 3000);
+    this.cdr.detectChanges();
+    setTimeout(() => { this.toastMsg = ''; this.cdr.detectChanges(); }, 3000);
   }
 
-  move(project: Project, direction: -1 | 1) {
-    const newOrder = project.order + direction;
-    this.adminDataService.updateProject(project.id, { order: newOrder }).subscribe(() => {
+  onDragStart(index: number) {
+    this.dragIndex = index;
+  }
+
+  onDragOver(event: DragEvent, index: number) {
+    event.preventDefault();
+    this.dragOverIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  onDrop(dropIndex: number) {
+    const fromIndex = this.dragIndex;
+    this.dragIndex = null;
+    this.dragOverIndex = null;
+    if (fromIndex === null || fromIndex === dropIndex) return;
+
+    const from = this.projects[fromIndex];
+    const to = this.projects[dropIndex];
+    forkJoin([
+      this.adminDataService.updateProject(from.id, { order: to.order }),
+      this.adminDataService.updateProject(to.id, { order: from.order }),
+    ]).subscribe(() => {
       this.load();
       this.showToast('Order updated');
     });

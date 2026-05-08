@@ -1,16 +1,16 @@
 /* Admin Panel — Cyberpunk Design Tokens */
 :root {
-  --admin-bg: #0a0a0f;
-  --admin-surface: #111118;
-  --admin-surface-2: #1a1a26;
-  --admin-border: #2a2a3a;
+  --admin-bg: #0d0d16;
+  --admin-surface: #16162a;
+  --admin-surface-2: #1e1e34;
+  --admin-border: #32324e;
   --admin-neon: #00ffcc;
-  --admin-neon-dim: rgba(0, 255, 204, 0.15);
-  --admin-neon-glow: 0 0 8px rgba(0, 255, 204, 0.5);
+  --admin-neon-dim: rgba(0, 255, 204, 0.12);
+  --admin-neon-glow: 0 0 8px rgba(0, 255, 204, 0.4);
   --admin-accent: #ff00aa;
-  --admin-accent-dim: rgba(255, 0, 170, 0.15);
-  --admin-text: #e0e0f0;
-  --admin-text-muted: #6a6a8a;
+  --admin-accent-dim: rgba(255, 0, 170, 0.12);
+  --admin-text: #d4d4ee;
+  --admin-text-muted: #8888aa;
   --admin-danger: #ff3355;
   --admin-success: #00ffcc;
   --admin-warning: #ffaa00;
@@ -32,7 +32,7 @@
 .admin-input,
 .admin-select,
 .admin-textarea {
-  background: var(--admin-surface);
+  background: var(--admin-surface-2);
   border: 1px solid var(--admin-border);
   color: var(--admin-text);
   font-family: var(--admin-font);
@@ -43,20 +43,34 @@
   width: 100%;
   box-sizing: border-box;
   transition: border-color var(--admin-transition), box-shadow var(--admin-transition);
+  -webkit-appearance: none;
+  appearance: none;
 
   &:focus {
     border-color: var(--admin-neon);
     box-shadow: var(--admin-neon-glow);
+    background: var(--admin-surface-2);
   }
 
   &::placeholder {
     color: var(--admin-text-muted);
+    opacity: 1;
+  }
+
+  option {
+    background: var(--admin-surface-2);
+    color: var(--admin-text);
   }
 }
 
 .admin-textarea {
   resize: vertical;
   min-height: 80px;
+}
+
+input[type="date"].admin-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
 }
 
 /* Buttons */

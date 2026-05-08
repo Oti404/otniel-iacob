@@ -1,6 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ContentService } from '../../../services/content.service';
 import { AdminDataService } from '../../services/admin-data.service';
 import { Experience } from '@monorepo/shared';
@@ -31,8 +32,8 @@ import { Experience } from '@monorepo/shared';
           <tr *ngFor="let ex of experiences; let i = index">
             <td>
               <div class="admin-order-btns">
-                <button (click)="move(ex, -1)" [disabled]="i === 0">▲</button>
-                <button (click)="move(ex, 1)" [disabled]="i === experiences.length - 1">▼</button>
+                <button (click)="move(i, -1)" [disabled]="i === 0">▲</button>
+                <button (click)="move(i, 1)" [disabled]="i === experiences.length - 1">▼</button>
               </div>
             </td>
             <td><strong>{{ ex.company }}</strong></td>
@@ -65,32 +66,34 @@ import { Experience } from '@monorepo/shared';
 export class ExperienceListComponent implements OnInit {
   contentService = inject(ContentService);
   adminDataService = inject(AdminDataService);
-  
+  cdr = inject(ChangeDetectorRef);
+
   experiences: Experience[] = [];
   confirmDeleteId: number | null = null;
   toastMsg = '';
 
-  ngOnInit() {
-    this.load();
-  }
+  ngOnInit() { this.load(); }
 
   load() {
     this.contentService.getExperience().subscribe(data => {
       this.experiences = data.sort((a, b) => a.order - b.order);
+      this.cdr.detectChanges();
     });
   }
 
   showToast(msg: string) {
     this.toastMsg = msg;
-    setTimeout(() => this.toastMsg = '', 3000);
+    this.cdr.detectChanges();
+    setTimeout(() => { this.toastMsg = ''; this.cdr.detectChanges(); }, 3000);
   }
 
-  move(ex: Experience, direction: -1 | 1) {
-    const newOrder = ex.order + direction;
-    this.adminDataService.updateExperience(ex.id, { order: newOrder }).subscribe(() => {
-      this.load();
-      this.showToast('Order updated');
-    });
+  move(i: number, direction: -1 | 1) {
+    const current = this.experiences[i];
+    const adjacent = this.experiences[i + direction];
+    forkJoin([
+      this.adminDataService.updateExperience(current.id, { order: adjacent.order }),
+      this.adminDataService.updateExperience(adjacent.id, { order: current.order }),
+    ]).subscribe(() => { this.load(); this.showToast('Order updated'); });
   }
 
   deleteExperience(id: number) {

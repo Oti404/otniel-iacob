@@ -9,6 +9,9 @@ export const profileSchema = z.object({
   name: z.string().min(1),
   role: z.string().min(1),
   description: z.string().min(1),
+  headline: z.string().nullable().optional().transform(v => v ?? null),
+  quote: z.string().nullable().optional().transform(v => v ?? null),
+  quoteAuthor: z.string().nullable().optional().transform(v => v ?? null),
   photo: z.string().min(1),
   avatar: z.string().min(1),
   cvPdf: z.string().min(1),
@@ -18,10 +21,10 @@ export const profileSchema = z.object({
   github: z.string().url(),
 });
 
-const contributorSchema = z.union([
-  z.string(),
-  z.tuple([z.string(), z.string().url()]),
-]);
+export const contributorEntitySchema = z.object({
+  name: z.string().min(1),
+  link: z.string().url().nullable().optional().transform(v => v ?? null),
+});
 
 export const projectSchema = z.object({
   name: z.string().min(1),
@@ -29,7 +32,7 @@ export const projectSchema = z.object({
   tech: z.string().min(1),
   link: z.string().url().nullable().optional(),
   liveLink: z.string().url().nullable().optional(),
-  contributors: z.array(contributorSchema).nullable().optional(),
+  contributorIds: z.array(z.number().int()).nullable().optional(),
   awards: z.string().nullable().optional(),
   display: z.boolean(),
   date: z.string().datetime(),

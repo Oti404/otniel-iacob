@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse, Profile, Project, Experience, Semester, Hobby, Subject } from '@monorepo/shared';
+import { ApiResponse, Contributor, Profile, Project, Experience, Semester, Hobby, Subject } from '@monorepo/shared';
 
 @Injectable({ providedIn: 'root' })
 export class AdminDataService {
@@ -54,6 +54,20 @@ export class AdminDataService {
   }
   deleteSemester(id: string): Observable<{ id: string }> {
     return this.http.delete<ApiResponse<{ id: string }>>(`/api/admin/semesters/${id}`).pipe(map((r) => r.data));
+  }
+
+  // ─── CONTRIBUTORS ────────────────────────────────────────────────────────────
+  getContributors(): Observable<Contributor[]> {
+    return this.http.get<ApiResponse<Contributor[]>>('/api/admin/contributors').pipe(map((r) => r.data));
+  }
+  createContributor(data: { name: string; link?: string | null }): Observable<Contributor> {
+    return this.http.post<ApiResponse<Contributor>>('/api/admin/contributors', data).pipe(map((r) => r.data));
+  }
+  updateContributor(id: number, data: { name: string; link?: string | null }): Observable<Contributor> {
+    return this.http.put<ApiResponse<Contributor>>(`/api/admin/contributors/${id}`, data).pipe(map((r) => r.data));
+  }
+  deleteContributor(id: number): Observable<{ id: number }> {
+    return this.http.delete<ApiResponse<{ id: number }>>(`/api/admin/contributors/${id}`).pipe(map((r) => r.data));
   }
 
   // ─── SUBJECTS ────────────────────────────────────────────────────────────────

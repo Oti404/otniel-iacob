@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ContentService } from '../../../services/content.service';
@@ -120,7 +120,8 @@ import { FileUploadComponent } from '../../components/file-upload/file-upload.co
 export class SemestersListComponent implements OnInit {
   contentService = inject(ContentService);
   adminDataService = inject(AdminDataService);
-  
+  cdr = inject(ChangeDetectorRef);
+
   semesters: Semester[] = [];
   toastMsg = '';
 
@@ -140,14 +141,15 @@ export class SemestersListComponent implements OnInit {
   load() {
     this.contentService.getSemesters().subscribe(data => {
       this.semesters = data.sort((a, b) => a.order - b.order);
-      // Sort subjects by code
       this.semesters.forEach(s => s.subjects.sort((a, b) => a.code.localeCompare(b.code)));
+      this.cdr.detectChanges();
     });
   }
 
   showToast(msg: string) {
     this.toastMsg = msg;
-    setTimeout(() => this.toastMsg = '', 3000);
+    this.cdr.detectChanges();
+    setTimeout(() => { this.toastMsg = ''; this.cdr.detectChanges(); }, 3000);
   }
 
   // --- SEMESTERS ---

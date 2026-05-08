@@ -236,6 +236,9 @@ html {
   scroll-behavior: smooth; /* Activează scroll fin global */
   scroll-padding-top: 100px; /* Când dai click, se oprește cu 100px mai sus */
 }
+/* ─── ADMIN PANEL GLOBAL STYLES ───────────────────────────────────────────── */
+@import 'app/admin/admin';
+
 .profile-img {
   /* Dimensiuni standard */
   width: 180px;

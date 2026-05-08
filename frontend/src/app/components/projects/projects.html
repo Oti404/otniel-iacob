@@ -28,28 +28,22 @@
         <span>🏆 {{ p.awards }}</span>
       </div>
 
-      <p class="description">{{ p.description }}</p>
+      <p class="description" [class.collapsed]="!expanded[p.id]">{{ p.description }}</p>
+      <button class="read-more" *ngIf="p.description.length > 150" (click)="toggle(p.id)">
+        {{ expanded[p.id] ? '↑ less' : '↓ more' }}
+      </button>
 
       <div class="contributors" *ngIf="p.contributors && p.contributors.length > 0">
-  <small>Team:</small>
-  <div class="contributors-list">
-    <ng-container *ngFor="let c of p.contributors; let last = last">
-
-      <ng-container *ngIf="isContributorLink(c); else plainName">
-        <a [href]="c[1]" target="_blank" class="contributor-chip contributor-link">
-          {{ c[0] }}
-        </a>
-      </ng-container>
-
-      <ng-template #plainName>
-        <span class="contributor-chip">{{ c }}</span>
-      </ng-template>
-
-    </ng-container>
-  </div>
-</div>
+        <small>Team:</small>
+        <div class="contributors-list">
+          <ng-container *ngFor="let c of p.contributors">
+            <a *ngIf="c.link" [href]="c.link" target="_blank" class="contributor-chip contributor-link">{{ c.name }}</a>
+            <span *ngIf="!c.link" class="contributor-chip">{{ c.name }}</span>
+          </ng-container>
+        </div>
+      </div>
       <div class="tech-stack">
-        <span class="tech-tag">{{ p.tech }}</span>
+        <span class="tech-tag" *ngFor="let t of splitTech(p.tech)">{{ t }}</span>
       </div>
 
       <div class="action-buttons">

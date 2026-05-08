@@ -1,14 +1,12 @@
 <section class="hero-section">
 
   <div class="hero-text">
-<span class="badge">Software Developer & CS Student</span>    <h1>Building the <span class="highlight">Future</span> with Code</h1>
+<span class="badge">{{ profile?.role }}</span>    <h1>{{ profile?.headline ?? 'Building the Future with Code' }}</h1>
     <h2>{{ profile?.name ?? 'Otniel-Viorel Iacob' }}</h2>
 
-    <div class="quote-wrapper">
-      <p class="description">
-        "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away."
-      </p>
-      <span class="author">— Antoine de Saint-Exupéry</span>
+    <div class="quote-wrapper" *ngIf="profile?.quote">
+      <p class="description">"{{ profile?.quote }}"</p>
+      <span class="author" *ngIf="profile?.quoteAuthor">— {{ profile?.quoteAuthor }}</span>
     </div>
 
     <div class="cta-buttons">

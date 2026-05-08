@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -59,6 +59,7 @@ export class HobbyFormComponent implements OnInit {
   contentService = inject(ContentService);
   adminDataService = inject(AdminDataService);
 
+  cdr = inject(ChangeDetectorRef);
   isEdit = false;
   id: number | null = null;
   loaded = false;
@@ -88,6 +89,7 @@ export class HobbyFormComponent implements OnInit {
           });
         }
         this.loaded = true;
+        this.cdr.detectChanges();
       });
     } else {
       this.loaded = true;

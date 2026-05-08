@@ -25,6 +25,9 @@ export interface Profile {
   name: string;
   role: string;
   description: string;
+  headline?: string | null;
+  quote?: string | null;
+  quoteAuthor?: string | null;
   photo: string;
   avatar: string;
   cvPdf: string;
@@ -32,6 +35,12 @@ export interface Profile {
   email: string;
   linkedin: string;
   github: string;
+}
+
+export interface Contributor {
+  id: number;
+  name: string;
+  link?: string | null;
 }
 
 export type ProjectStatus = 'completed' | 'wip' | 'archived';
@@ -43,7 +52,7 @@ export interface Project {
   tech: string;
   link?: string | null;
   liveLink?: string | null;
-  contributors?: (string | [string, string])[] | null;
+  contributors?: Contributor[] | null;
   awards?: string | null;
   display: boolean;
   date: string;

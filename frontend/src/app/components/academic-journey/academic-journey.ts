@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentService } from '../../services/content.service';
 import { Semester, Subject } from '@monorepo/shared';
@@ -18,8 +18,8 @@ export class AcademicJourneyComponent implements OnInit {
   loading = true;
 
   @ViewChild('academicContainer') containerRef!: ElementRef;
-
-  constructor(private content: ContentService) {}
+  private content = inject(ContentService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.content.getSemesters().subscribe({
@@ -27,8 +27,9 @@ export class AcademicJourneyComponent implements OnInit {
         this.academicData = semesters;
         this.activeSemester = semesters[0] ?? null;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 

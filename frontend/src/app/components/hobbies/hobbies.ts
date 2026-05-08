@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentService } from '../../services/content.service';
 import { Hobby } from '@monorepo/shared';
@@ -13,13 +13,13 @@ import { Hobby } from '@monorepo/shared';
 export class Hobbies implements OnInit {
   hobbiesList: Hobby[] = [];
   loading = true;
-
-  constructor(private content: ContentService) {}
+  private content = inject(ContentService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.content.getHobbies().subscribe({
-      next: (data) => { this.hobbiesList = data; this.loading = false; },
-      error: () => { this.loading = false; },
+      next: (data) => { this.hobbiesList = data; this.loading = false; this.cdr.detectChanges(); },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 }

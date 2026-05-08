@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentService } from '../../services/content.service';
 import { Project } from '@monorepo/shared';
@@ -13,24 +13,29 @@ import { Project } from '@monorepo/shared';
 export class Projects implements OnInit {
   sortedProjects: Project[] = [];
   loading = true;
-
-  constructor(private content: ContentService) {}
+  private content = inject(ContentService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.content.getProjects().subscribe({
       next: (projects) => {
-        this.sortedProjects = [...projects].sort((a, b) => {
-          if (a.status === 'wip' && b.status !== 'wip') return -1;
-          if (a.status !== 'wip' && b.status === 'wip') return 1;
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        });
+        this.sortedProjects = [...projects].sort((a, b) => a.order - b.order);
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 
-  isContributorLink(c: string | [string, string]): c is [string, string] {
-    return Array.isArray(c);
+  expanded: Record<number, boolean> = {};
+
+  toggle(id: number) {
+    this.expanded[id] = !this.expanded[id];
+    this.cdr.detectChanges();
   }
+
+  splitTech(tech: string): string[] {
+    return tech.split(',').map(t => t.trim()).filter(Boolean);
+  }
+
 }

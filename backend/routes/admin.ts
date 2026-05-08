@@ -4,6 +4,7 @@ import { authMiddleware } from '../middleware/auth';
 import {
   profileSchema,
   projectSchema,
+  contributorEntitySchema,
   experienceSchema,
   semesterSchema,
   subjectSchema,
@@ -50,14 +51,19 @@ router.post('/projects', async (req: Request, res: Response) => {
   if (!parsed.success) { res.status(400).json({ message: zodError(parsed) }); return; }
   try {
     const d = parsed.data;
+    const maxResult = await prisma.project.aggregate({ _max: { order: true } });
+    const nextOrder = (maxResult._max.order ?? 0) + 1;
     const project = await prisma.project.create({
       data: {
         name: d.name, description: d.description, tech: d.tech, display: d.display,
-        status: d.status, order: d.order, date: new Date(d.date),
-        link: d.link ?? null, liveLink: d.liveLink ?? null,
-        contributors: d.contributors ?? Prisma.JsonNull, awards: d.awards ?? null,
+        status: d.status, order: nextOrder, date: new Date(d.date),
+        link: d.link ?? null, liveLink: d.liveLink ?? null, awards: d.awards ?? null,
         endDate: d.endDate ? new Date(d.endDate) : null,
+        ...(d.contributorIds?.length
+          ? { contributors: { create: d.contributorIds.map((cid) => ({ contributorId: cid })) } }
+          : {}),
       },
+      include: { contributors: { include: { contributor: true } } },
     });
     res.status(201).json({ data: project });
   } catch (error) {
@@ -67,23 +73,82 @@ router.post('/projects', async (req: Request, res: Response) => {
 });
 
 router.put('/projects/:id', async (req: Request, res: Response) => {
-  const parsed = projectSchema.safeParse(req.body);
+  const parsed = projectSchema.partial().safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ message: zodError(parsed) }); return; }
   try {
     const d = parsed.data;
+    const pid = id(req);
+    const updateData: Record<string, unknown> = {};
+    if (d.name !== undefined) updateData['name'] = d.name;
+    if (d.description !== undefined) updateData['description'] = d.description;
+    if (d.tech !== undefined) updateData['tech'] = d.tech;
+    if (d.display !== undefined) updateData['display'] = d.display;
+    if (d.status !== undefined) updateData['status'] = d.status;
+    if (d.order !== undefined) updateData['order'] = d.order;
+    if (d.date !== undefined) updateData['date'] = new Date(d.date);
+    if (d.endDate !== undefined) updateData['endDate'] = d.endDate ? new Date(d.endDate) : null;
+    if (d.link !== undefined) updateData['link'] = d.link ?? null;
+    if (d.liveLink !== undefined) updateData['liveLink'] = d.liveLink ?? null;
+    if (d.awards !== undefined) updateData['awards'] = d.awards ?? null;
+    if (d.contributorIds !== undefined) {
+      await prisma.projectContributor.deleteMany({ where: { projectId: pid } });
+      if (d.contributorIds?.length) {
+        await prisma.projectContributor.createMany({
+          data: d.contributorIds.map((cid) => ({ projectId: pid, contributorId: cid })),
+        });
+      }
+    }
     const project = await prisma.project.update({
-      where: { id: id(req) },
-      data: {
-        name: d.name, description: d.description, tech: d.tech, display: d.display,
-        status: d.status, order: d.order, date: new Date(d.date),
-        link: d.link ?? null, liveLink: d.liveLink ?? null,
-        contributors: d.contributors ?? Prisma.JsonNull, awards: d.awards ?? null,
-        endDate: d.endDate ? new Date(d.endDate) : null,
-      },
+      where: { id: pid }, data: updateData,
+      include: { contributors: { include: { contributor: true } } },
     });
     res.json({ data: project });
   } catch {
     res.status(404).json({ message: 'Project not found' });
+  }
+});
+
+// ─── CONTRIBUTORS ────────────────────────────────────────────────────────────
+
+router.get('/contributors', async (_req: Request, res: Response) => {
+  try {
+    const contributors = await prisma.contributor.findMany({ orderBy: { name: 'asc' } });
+    res.json({ data: contributors });
+  } catch (error) {
+    console.error('[GET /admin/contributors]', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+router.post('/contributors', async (req: Request, res: Response) => {
+  const parsed = contributorEntitySchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ message: zodError(parsed) }); return; }
+  try {
+    const contributor = await prisma.contributor.create({ data: parsed.data });
+    res.status(201).json({ data: contributor });
+  } catch (error) {
+    console.error('[POST /admin/contributors]', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+router.put('/contributors/:id', async (req: Request, res: Response) => {
+  const parsed = contributorEntitySchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ message: zodError(parsed) }); return; }
+  try {
+    const contributor = await prisma.contributor.update({ where: { id: id(req) }, data: parsed.data });
+    res.json({ data: contributor });
+  } catch {
+    res.status(404).json({ message: 'Contributor not found' });
+  }
+});
+
+router.delete('/contributors/:id', async (req: Request, res: Response) => {
+  try {
+    await prisma.contributor.delete({ where: { id: id(req) } });
+    res.json({ data: { id: id(req) } });
+  } catch {
+    res.status(404).json({ message: 'Contributor not found' });
   }
 });
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContentService } from '../../services/content.service';
 import { Experience } from '@monorepo/shared';
@@ -13,13 +13,13 @@ import { Experience } from '@monorepo/shared';
 export class ExperienceComponent implements OnInit {
   experiences: Experience[] = [];
   loading = true;
-
-  constructor(private content: ContentService) {}
+  private content = inject(ContentService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.content.getExperience().subscribe({
-      next: (data) => { this.experiences = data; this.loading = false; },
-      error: () => { this.loading = false; },
+      next: (data) => { this.experiences = data; this.loading = false; this.cdr.detectChanges(); },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 
