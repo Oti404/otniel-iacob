@@ -6,7 +6,6 @@ import { loginSchema } from '@monorepo/shared';
 
 const router = Router();
 
-
 router.post('/login', async (req: Request, res: Response) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -41,7 +40,7 @@ router.post('/login', async (req: Request, res: Response) => {
   res.json({ data: { accessToken } });
 });
 
-router.post('/refresh', (req: Request, res: Response) => {
+router.post('/refresh', async (req: Request, res: Response) => {
   const token = req.cookies?.refreshToken;
   if (!token) {
     res.status(401).json({ message: 'No refresh token' });
@@ -49,8 +48,13 @@ router.post('/refresh', (req: Request, res: Response) => {
   }
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as unknown as { sub: number; email?: string };
-    const accessToken = jwt.sign({ sub: payload.sub }, process.env.JWT_SECRET!, { expiresIn: '15m' });
+    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { sub: number };
+    const user = await prisma.adminUser.findUnique({ where: { id: payload.sub } });
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
+    }
+    const accessToken = jwt.sign({ sub: user.id, email: user.email }, process.env.JWT_SECRET!, { expiresIn: '15m' });
     res.json({ data: { accessToken } });
   } catch {
     res.status(401).json({ message: 'Invalid or expired refresh token' });

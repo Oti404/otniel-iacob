@@ -19,7 +19,9 @@ function zodError(parsed: { success: false; error: { errors: { message: string }
 }
 
 function id(req: Request): number {
-  return parseInt(String(req.params['id']));
+  const parsed = parseInt(String(req.params['id']), 10);
+  if (isNaN(parsed) || parsed < 1) throw new Error('Invalid ID');
+  return parsed;
 }
 
 function strId(req: Request): string {

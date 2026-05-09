@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
@@ -16,6 +16,14 @@ import uploadRouter from './routes/upload';
 import internalRouter from './routes/internal';
 import aiChatRouter from './routes/ai-chat';
 
+// ─── Startup validation ───────────────────────────────────────────────────────
+const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'INTERNAL_API_KEY'];
+for (const key of required) {
+  if (!process.env[key] || process.env[key]!.length < 16) {
+    throw new Error(`Missing or too short env var: ${key} (min 16 chars)`);
+  }
+}
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -23,8 +31,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : ['http://localhost:4200', 'http://localhost:80'];
 
+app.disable('x-powered-by');
 app.use(cors({ origin: allowedOrigins, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
 const authLimiter = rateLimit({
@@ -64,6 +73,12 @@ app.use('/api/admin', adminRouter);
 app.use('/api/admin/upload', uploadRouter);
 app.use('/api/internal', internalRouter);
 app.use('/api/admin/ai-chat', aiChatRouter);
+
+// ─── Global error handler ─────────────────────────────────────────────────────
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[Unhandled error]', err.message);
+  res.status(500).json({ message: 'Internal server error' });
+});
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

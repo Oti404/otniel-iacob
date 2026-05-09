@@ -1,11 +1,22 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '@monorepo/database';
+import { contributorEntitySchema } from '@monorepo/shared';
+import crypto from 'crypto';
+import { z } from 'zod';
 
 const router = Router();
 
 function internalKeyMiddleware(req: Request, res: Response, next: NextFunction): void {
   const key = req.headers['x-internal-key'];
-  if (!key || key !== process.env.INTERNAL_API_KEY) {
+  const expected = process.env.INTERNAL_API_KEY;
+  if (!key || !expected || typeof key !== 'string') {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+  try {
+    const valid = crypto.timingSafeEqual(Buffer.from(key), Buffer.from(expected));
+    if (!valid) { res.status(401).json({ message: 'Unauthorized' }); return; }
+  } catch {
     res.status(401).json({ message: 'Unauthorized' });
     return;
   }
@@ -13,6 +24,24 @@ function internalKeyMiddleware(req: Request, res: Response, next: NextFunction):
 }
 
 router.use(internalKeyMiddleware);
+
+const internalProjectSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().min(1).max(2000),
+  tech: z.string().min(1).max(500),
+  link: z.string().url().optional().nullable(),
+  liveLink: z.string().url().optional().nullable(),
+  awards: z.string().max(500).optional().nullable(),
+  display: z.boolean().optional(),
+  date: z.string().min(1),
+  endDate: z.string().optional().nullable(),
+  status: z.enum(['completed', 'wip', 'archived']),
+  contributorIds: z.array(z.number().int().positive()).optional(),
+  newContributors: z.array(z.object({
+    name: z.string().min(1).max(100),
+    link: z.string().url().optional().nullable(),
+  })).optional(),
+});
 
 router.get('/contributors', async (_req: Request, res: Response) => {
   try {
@@ -25,10 +54,13 @@ router.get('/contributors', async (_req: Request, res: Response) => {
 });
 
 router.post('/contributors', async (req: Request, res: Response) => {
-  const { name, link } = req.body;
-  if (!name) { res.status(400).json({ message: 'Name is required' }); return; }
+  const parsed = contributorEntitySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: parsed.error.errors[0]?.message ?? 'Validation error' });
+    return;
+  }
   try {
-    const contributor = await prisma.contributor.create({ data: { name, link: link ?? null } });
+    const contributor = await prisma.contributor.create({ data: parsed.data });
     res.status(201).json({ data: contributor });
   } catch (error) {
     console.error('[POST /internal/contributors]', error);
@@ -37,7 +69,12 @@ router.post('/contributors', async (req: Request, res: Response) => {
 });
 
 router.post('/projects', async (req: Request, res: Response) => {
-  const { name, description, tech, link, liveLink, contributorIds, newContributors, awards, display, date, endDate, status } = req.body;
+  const parsed = internalProjectSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: parsed.error.errors[0]?.message ?? 'Validation error' });
+    return;
+  }
+  const { contributorIds, newContributors, date, endDate, ...rest } = parsed.data;
   try {
     const allContributorIds = [...(contributorIds ?? [])];
 
@@ -53,13 +90,12 @@ router.post('/projects', async (req: Request, res: Response) => {
 
     const project = await prisma.project.create({
       data: {
-        name, description, tech, display: display ?? true,
-        status, order: nextOrder,
+        ...rest,
         date: new Date(date),
         endDate: endDate ? new Date(endDate) : null,
-        link: link ?? null, liveLink: liveLink ?? null, awards: awards ?? null,
+        order: nextOrder,
         ...(allContributorIds.length
-          ? { contributors: { create: allContributorIds.map((id: number) => ({ contributorId: id })) } }
+          ? { contributors: { create: allContributorIds.map((id) => ({ contributorId: id })) } }
           : {}),
       },
       include: { contributors: { include: { contributor: true } } },
