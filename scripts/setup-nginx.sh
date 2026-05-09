@@ -4,6 +4,12 @@ set -e
 DOMAIN=${1:-}
 EMAIL=${2:-}
 
+# If domain is an IP address, SSL is not possible — fall back to HTTP-only
+if [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "EC2_DOMAIN is an IP address — Let's Encrypt requires a real domain. Using HTTP-only mode."
+  DOMAIN=""
+fi
+
 # ─── Install nginx ────────────────────────────────────────────────────────────
 if ! command -v nginx &> /dev/null; then
   echo "Installing nginx..."
