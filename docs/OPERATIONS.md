@@ -13,12 +13,14 @@ push → main
   ├── npm ci + build frontend (CI check)
   ├── SSH la EC2
   ├── setup-ec2.sh    — instalare Docker (skip dacă există)
-  ├── setup-nginx.sh  — instalare nginx + SSL (idempotent)
   ├── scrie .env din GitHub Secrets
   ├── rsync fișiere la ~/app/
-  ├── docker compose -f docker-compose.prod.yml up -d --build
-  └── curl localhost:3000/api/health  (health check)
+  ├── docker compose -f docker-compose.prod.yml up -d --build   ← Docker ÎNAINTE de nginx
+  ├── setup-nginx.sh  — instalare nginx + SSL (idempotent)       ← nginx DUPĂ Docker
+  └── curl localhost:3000/api/health  (health check, sleep 45s)
 ```
+
+**Notă ordine:** Docker compose pornește înainte de nginx — nginx proxy-iază spre containerele deja pornite. Inversul cauzează conflict pe portul 80.
 
 **Workflow:** `.github/workflows/deploy-aws.yml`
 

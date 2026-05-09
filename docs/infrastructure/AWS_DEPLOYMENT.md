@@ -1,46 +1,73 @@
-# AWS Deployment Architecture & Strategy
+# Arhitectura AWS — Implementare Actuală
 
-This document outlines the blueprint for deploying the Monorepo Ecosystem (Angular, Node.js, Prisma, PostgreSQL, n8n) to Amazon Web Services (AWS) in a scalable, secure, and automated fashion.
+**Notă:** Documentul original descria un plan ECS Fargate + RDS care nu a fost implementat. Această versiune reflectă arhitectura reală în producție.
 
-## 1. Core Architecture Principles
+---
 
-Unlike our local `docker-compose.yml` which bundles everything onto a single machine, the production AWS architecture decouples the database from the application layer to guarantee data persistence and high availability.
+## Arhitectura curentă (EC2 single-instance)
 
-### 1.1 Compute: AWS ECS (Elastic Container Service) with Fargate
-We will NOT use standard EC2 instances (which require manual OS patching and scaling). Instead, we will use **AWS Fargate** (Serverless Compute for Containers).
-- **Frontend Task**: Runs the Nginx-based Angular container.
-- **Backend Task**: Runs the Node.js/Express API.
-- **n8n Task**: Runs the automation workflows.
+```
+Internet
+    │
+    ▼
+[ nginx ] ← port 80 public (443 când SSL activ)
+    │
+    ├── /api/          → 127.0.0.1:3000  (backend Express)
+    ├── /uploads/      → 127.0.0.1:3000  (fișiere statice)
+    ├── /api/internal/ → 403 BLOCAT      (Docker-only, nu public)
+    └── /             → 127.0.0.1:8080  (frontend Angular)
 
-### 1.2 Storage: AWS RDS (Relational Database Service)
-Running PostgreSQL inside a Docker container in production is an anti-pattern (high risk of data loss on container restart).
-- We will provision a managed **AWS RDS PostgreSQL** instance.
-- It will automatically handle daily backups, patch management, and vertical scaling.
-- The `DATABASE_URL` environment variable in ECS will point to this RDS instance.
+Docker Compose (monorepo-net):
+    ├── backend   — Express + TypeScript (ts-node --transpile-only)
+    ├── frontend  — Angular build servit de nginx intern
+    ├── postgres  — PostgreSQL 15 (fără port extern)
+    └── n8n       — Automation (127.0.0.1:5678, SSH tunnel only)
+```
 
-### 1.3 Networking & Security
-- **VPC (Virtual Private Cloud)**: All resources live inside a private AWS network.
-- **ALB (Application Load Balancer)**: Acts as the entry point to the internet. It maps:
-  - `portofoliu.ro/*` -> Frontend ECS Task
-  - `api.portofoliu.ro/*` -> Backend ECS Task
-  - `n8n.portofoliu.ro/*` -> n8n ECS Task
-- **Security Groups**: 
-  - RDS is strictly locked down. It only accepts connections from the Backend and n8n security groups.
-  - The Backend only accepts traffic from the ALB.
+**Server:** AWS EC2 t3.micro, Ubuntu 24.04  
+**IP:** `13.60.216.226`  
+**Cost:** Gratuit (Free Tier 12 luni)
 
-## 2. CI/CD Deployment Flow (GitHub Actions -> AWS)
+---
 
-Our existing `.github/workflows/main.yml` handles Continuous Integration (building and testing). For **Continuous Deployment (CD)**, we will add the following steps:
+## De ce nu ECS Fargate?
 
-1. **Build & Tag**: GitHub Actions builds the `Dockerfile` for frontend and backend.
-2. **Push to ECR**: The images are pushed to **AWS ECR (Elastic Container Registry)**, creating a permanent artifact.
-3. **Update ECS**: GitHub Actions calls the `aws-actions/amazon-ecs-deploy-task-definition` action to gracefully swap the old containers with the new ones (Blue/Green Deployment) with zero downtime.
+ECS Fargate + RDS este arhitectura corectă pentru aplicații cu trafic real. Pentru un portfolio personal cu un singur admin:
+- EC2 t3.micro este suficient și gratuit
+- Complexitatea ECS (task definitions, IAM roles, ECR, ALB) nu aduce valoare la această scală
+- Migrarea la ECS rămâne posibilă în viitor fără schimbări majore de cod
 
-## 3. Migration Strategy (Phase 4 Execution)
+---
 
-1. Provision AWS ECR Repositories.
-2. Provision RDS PostgreSQL instance.
-3. Push initial schema using `npx prisma migrate deploy`.
-4. Provision ECS Cluster and Task Definitions.
-5. Setup ALB and Route53 (DNS).
-6. Update GitHub Secrets with AWS Credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
+## Upgrade la HTTPS (când ai domeniu)
+
+1. Cumpără/configurează domeniu → A record → `13.60.216.226`
+2. Adaugă în GitHub Secrets: `EC2_DOMAIN=portofoliu.ro` și `CERTBOT_EMAIL=email@gmail.com`
+3. Actualizează `ALLOWED_ORIGINS=https://portofoliu.ro`
+4. Push orice modificare pe `main` → certbot obține cert Let's Encrypt automat → nginx trece pe HTTPS
+
+**Notă:** Let's Encrypt nu emite certificate pentru IP-uri bare — necesită domeniu DNS.
+
+---
+
+## Securitate rețea
+
+| Regula Security Group EC2 | Port | Sursă |
+|---|---|---|
+| SSH | 22 | Orice (0.0.0.0/0) |
+| HTTP | 80 | Orice (0.0.0.0/0) |
+| HTTPS | 443 | Orice (0.0.0.0/0) |
+
+Porturile interne (3000, 5678, 5432) nu sunt expuse public — legate la `127.0.0.1` în Docker Compose.
+
+---
+
+## Plan viitor (dacă traficul crește)
+
+| Componentă | Actuală | Viitoare |
+|---|---|---|
+| Compute | EC2 t3.micro | ECS Fargate |
+| DB | PostgreSQL în Docker | RDS PostgreSQL |
+| Secrets | GitHub Secrets | AWS Secrets Manager |
+| CDN | — | CloudFront |
+| Images | Build pe EC2 | ECR + build în CI |

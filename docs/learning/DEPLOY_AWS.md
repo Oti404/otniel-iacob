@@ -27,8 +27,8 @@
    i. Pe EC2: docker compose up -d --build --remove-orphans
 ```
 
-### De ce `workflow_dispatch` (manual)?
-Deploy-ul e configurat să ruleze **manual** (nu automat la fiecare push). Asta e o decizie deliberată — nu vrei ca fiecare commit mic să trigghereze un deploy complet pe producție.
+### Trigger automat
+Deploy-ul rulează **automat la orice push pe `main`**. Nu trebuie să apeși nimic manual — orice commit pe main declanșează pipeline-ul complet.
 
 ---
 
@@ -95,16 +95,21 @@ rsync -az --delete --exclude 'node_modules' --exclude '.git' \
 
 La fiecare pornire a containerului backend (`CMD` din `Dockerfile.prod`):
 ```sh
-cd /app/database && npx prisma db push --schema prisma/schema.prisma --accept-data-loss
-npx ts-node seed.ts
-cd /app && npm run dev:backend
+cd /app/database && \
+  (npx prisma migrate deploy --schema prisma/schema.prisma || \
+   (npx prisma migrate resolve --applied '20260502103912_add_content_schema' --schema prisma/schema.prisma && \
+    npx prisma migrate deploy --schema prisma/schema.prisma)) && \
+  npx ts-node --transpile-only seed.ts && \
+  cd /app/backend && npx ts-node --transpile-only index.ts
 ```
 
-1. **`prisma db push`** — sincronizează schema bazei de date (adaugă tabele noi, coloane noi)
+1. **`prisma migrate deploy`** — aplică migrările în ordine. Dacă baza de date a fost creată anterior cu `db push` (fără istoric de migrări), fallback-ul cu `migrate resolve --applied` face baseline și reîncercă.
 2. **`ts-node seed.ts`** — rulează seed-ul (upsert — nu suprascrie date existente, doar creează ce lipsește)
-3. **pornire backend** — serverul Express
+3. **pornire backend** — serverul Express via `ts-node --transpile-only`
 
-**De ce seed la fiecare pornire?** Seed-ul folosește `upsert` (insert sau update dacă există). E sigur să-l rulezi de oricâte ori — nu duplică date. Avantajul: dacă schimbi parola admin în GitHub Secrets și faci redeploy, parola se actualizează automat.
+**De ce `--transpile-only`?** Sare peste type checking la runtime — compilarea TypeScript se face în CI, nu la startup în producție. Reduce semnificativ timpul de pornire.
+
+**De ce seed la fiecare pornire?** Seed-ul folosește `upsert` — sigur să-l rulezi de oricâte ori. Dacă schimbi parola admin în GitHub Secrets și faci redeploy, parola se actualizează automat.
 
 ---
 
@@ -113,7 +118,7 @@ cd /app && npm run dev:backend
 Pe producție, portul 5678 al n8n nu e accesibil public (legat la `127.0.0.1`). Pentru a accesa interfața n8n de pe calculatorul tău:
 
 ```bash
-ssh -L 5678:localhost:5678 ubuntu@13.60.216.226
+ssh -i key.pem -N -L 5678:127.0.0.1:5678 ubuntu@13.60.216.226
 ```
 
 Acum deschizi `http://localhost:5678` în browser — traficul e tunelat prin SSH la serverul EC2.

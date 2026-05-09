@@ -62,8 +62,8 @@ Choose `[1]` for full Docker (no live reload) or `[2]` for hybrid mode (Docker f
 **Option B — Manual**
 
 ```bash
-# Hybrid mode: DB + n8n in Docker, apps locally
-docker-compose up -d postgres n8n
+# Hybrid mode: DB in Docker, apps locally (live reload)
+docker-compose up -d postgres
 npm install
 npm run dev
 ```
@@ -73,14 +73,16 @@ npm run dev
 docker-compose up -d --build
 ```
 
+> **Note:** n8n runs on the production server only — not locally. The AI chat module in the admin panel requires the production server or a manually configured local n8n instance.
+
 ### Ports
 
 | Service | URL |
 |---|---|
-| Frontend | http://localhost:80 (Docker) / http://localhost:4200 (dev) |
+| Frontend (dev) | http://localhost:4200 |
+| Frontend (Docker) | http://localhost:80 |
 | Backend API | http://localhost:3000 |
-| Admin Panel | http://localhost:80/admin |
-| n8n | http://localhost:5678 |
+| Admin Panel | http://localhost:4200/admin |
 | PostgreSQL | localhost:5433 |
 
 ### Seed the database
@@ -107,8 +109,10 @@ npm run build:all      # Build shared → backend → frontend
 
 ## Documentation
 
-- [`docs/AGENTS.md`](./docs/AGENTS.md) — AI agent chain of command (Architect → Planner → Coder → Reviewer → Security Officer → DevOps)
-- [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) — Directory structure and conventions
-- [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) — Deployment and sync guide
-- [`docs/sprints/`](./docs/sprints/) — Sprint plans (SPRINT-01 through SPRINT-03)
-- [`docs/infrastructure/`](./docs/infrastructure/) — AWS architecture and EC2 setup
+- [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) — Local dev setup, conventions, key files
+- [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) — Deployment, EC2 access, GitHub Secrets, rollback
+- [`docs/AGENTS.md`](./docs/AGENTS.md) — AI agent chain of command
+- [`docs/sprints/`](./docs/sprints/) — Sprint plans (SPRINT-01 through SPRINT-05)
+- [`docs/todo/SECURITY_TODO.md`](./docs/todo/SECURITY_TODO.md) — Security audit & remediation tracker
+- [`docs/learning/PROBLEME.md`](./docs/learning/PROBLEME.md) — Bugs encountered and how they were fixed
+- [`docs/infrastructure/`](./docs/infrastructure/) — EC2 setup guide
