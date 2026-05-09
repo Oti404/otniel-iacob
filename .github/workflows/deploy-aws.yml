@@ -49,6 +49,9 @@ jobs:
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "chmod +x /tmp/setup-ec2.sh && sudo /tmp/setup-ec2.sh"
 
       - name: Configure nginx and SSL
+        if: env.EC2_DOMAIN != ''
+        env:
+          EC2_DOMAIN: ${{ secrets.EC2_DOMAIN }}
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
             "chmod +x /tmp/setup-nginx.sh && sudo /tmp/setup-nginx.sh ${{ secrets.EC2_DOMAIN }} ${{ secrets.CERTBOT_EMAIL }}"

@@ -76,7 +76,7 @@ services:
       dockerfile: Dockerfile.prod
     restart: always
     ports:
-      - "127.0.0.1:8080:80"
+      - "80:80"
     networks:
       - monorepo-net
     depends_on:
