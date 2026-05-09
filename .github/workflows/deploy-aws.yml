@@ -43,18 +43,16 @@ jobs:
           scp -i ~/.ssh/ec2_key.pem scripts/setup-ec2.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/setup-ec2.sh
           scp -i ~/.ssh/ec2_key.pem scripts/setup-nginx.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/setup-nginx.sh
           scp -i ~/.ssh/ec2_key.pem scripts/nginx-prod.conf ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/nginx-prod.conf
+          scp -i ~/.ssh/ec2_key.pem scripts/nginx-prod-ssl.conf ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/nginx-prod-ssl.conf
 
       - name: Run Docker setup on EC2
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "chmod +x /tmp/setup-ec2.sh && sudo /tmp/setup-ec2.sh"
 
-      - name: Configure nginx and SSL
-        if: env.EC2_DOMAIN != ''
-        env:
-          EC2_DOMAIN: ${{ secrets.EC2_DOMAIN }}
+      - name: Configure nginx
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
-            "chmod +x /tmp/setup-nginx.sh && sudo /tmp/setup-nginx.sh ${{ secrets.EC2_DOMAIN }} ${{ secrets.CERTBOT_EMAIL }}"
+            "chmod +x /tmp/setup-nginx.sh && sudo /tmp/setup-nginx.sh '${{ secrets.EC2_DOMAIN }}' '${{ secrets.CERTBOT_EMAIL }}'"
 
       - name: Write .env on EC2
         run: |
@@ -67,7 +65,7 @@ jobs:
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-          ALLOWED_ORIGINS=https://${{ secrets.EC2_DOMAIN }}
+          ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
           INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
           N8N_CHAT_WEBHOOK_URL=http://n8n:5678/webhook/${{ secrets.N8N_WEBHOOK_ID }}/chat
           N8N_WEBHOOK_URL=http://localhost:5678/
