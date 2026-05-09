@@ -152,10 +152,11 @@ async function main() {
   ];
 
   for (const project of projects) {
+    const { contributors, ...projectData } = project as any;
     await prisma.project.upsert({
       where: { id: projects.indexOf(project) + 1 },
       update: {},
-      create: project,
+      create: projectData,
     });
   }
 
