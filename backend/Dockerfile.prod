@@ -16,4 +16,4 @@ RUN cd database && npx prisma generate --schema prisma/schema.prisma
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "cd /app/database && npx prisma db push --schema prisma/schema.prisma --accept-data-loss && npx ts-node seed.ts && cd /app && npm run dev:backend"]
+CMD ["sh", "-c", "cd /app/database && npx prisma migrate deploy --schema prisma/schema.prisma && npx ts-node --transpile-only seed.ts && cd /app/backend && npx ts-node --transpile-only index.ts"]

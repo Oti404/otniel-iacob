@@ -90,8 +90,8 @@
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
-          "id": "dqMgnsbYV7TLrHdn",
-          "name": "Postgres account"
+          "id": "3Q6qqQoXEDY7a3MY",
+          "name": "Postgres account 2"
         }
       }
     },
@@ -289,10 +289,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "7b129fa8-1989-41b2-aa6a-0fe25954f2a5",
+  "versionId": "faf47730-9f1a-417f-a4b8-70fa89a744df",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "afbcd549dc6c12d74bd4ae5d439abc2142cc9d16ee3191fb5c391d2e835bc420"
+    "instanceId": "441b4dd3287f70181fd6ac411f59c771570c258c8953cea84edb6da266714449"
   },
   "id": "Z1FhuTqHTphEqcqS",
   "tags": []
