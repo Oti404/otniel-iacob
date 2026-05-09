@@ -14,14 +14,22 @@ else
   echo "Nginx already installed, skipping."
 fi
 
+# Start nginx if not running (e.g. first run after install)
+systemctl enable nginx
+systemctl is-active --quiet nginx || systemctl start nginx
+
 rm -f /etc/nginx/sites-enabled/default
+
+nginx_apply() {
+  nginx -t && (systemctl is-active --quiet nginx && systemctl reload nginx || systemctl start nginx)
+}
 
 # ─── No domain: HTTP-only config ─────────────────────────────────────────────
 if [ -z "$DOMAIN" ]; then
   echo "No domain configured. Applying HTTP-only nginx config..."
   cp /tmp/nginx-prod.conf /etc/nginx/sites-available/portfolio
   ln -sf /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/portfolio
-  nginx -t && systemctl reload nginx
+  nginx_apply
   echo "Nginx running in HTTP-only mode."
   exit 0
 fi
@@ -42,7 +50,7 @@ if [ ! -d "$CERT_DIR" ]; then
   echo "No SSL cert found. Bootstrapping HTTP config to obtain cert..."
   cp /tmp/nginx-prod.conf "$NGINX_CONF"
   ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/
-  nginx -t && systemctl reload nginx
+  nginx_apply
 
   mkdir -p /var/www/certbot
   certbot certonly --webroot -w /var/www/certbot -d "$DOMAIN" \
@@ -54,7 +62,7 @@ fi
 echo "Applying HTTPS nginx config for $DOMAIN..."
 sed "s/YOUR_DOMAIN/$DOMAIN/g" /tmp/nginx-prod-ssl.conf > "$NGINX_CONF"
 ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
+nginx_apply
 echo "Nginx running with HTTPS for $DOMAIN."
 
 # Auto-renewal cron (once)
