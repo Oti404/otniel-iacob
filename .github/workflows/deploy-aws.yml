@@ -85,6 +85,6 @@ jobs:
 
       - name: Health check
         run: |
-          sleep 15
+          sleep 45
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
-            "curl -sf http://localhost:3000/api/health || (echo 'Health check failed' && exit 1)"
+            "curl -sf http://localhost:3000/api/health || (echo '--- Backend logs ---' && sudo docker compose -f ~/app/docker-compose.prod.yml logs backend --tail=60 && echo 'Health check failed' && exit 1)"
