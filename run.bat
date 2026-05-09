@@ -50,7 +50,7 @@ goto end
 :local_dev
 echo.
 echo Starting Database and n8n in Docker...
-docker-compose up -d postgres n8n
+docker-compose up -d postgres
 
 echo.
 echo Installing dependencies (if any are missing)...
