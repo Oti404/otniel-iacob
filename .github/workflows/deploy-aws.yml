@@ -49,11 +49,6 @@ jobs:
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "chmod +x /tmp/setup-ec2.sh && sudo /tmp/setup-ec2.sh"
 
-      - name: Configure nginx
-        run: |
-          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
-            "chmod +x /tmp/setup-nginx.sh && sudo /tmp/setup-nginx.sh '${{ secrets.EC2_DOMAIN }}' '${{ secrets.CERTBOT_EMAIL }}'"
-
       - name: Write .env on EC2
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
@@ -82,6 +77,11 @@ jobs:
         run: |
           ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
             "cd ~/app && sudo docker compose -f docker-compose.prod.yml up -d --build --remove-orphans"
+
+      - name: Configure nginx
+        run: |
+          ssh -i ~/.ssh/ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} \
+            "chmod +x /tmp/setup-nginx.sh && sudo /tmp/setup-nginx.sh '${{ secrets.EC2_DOMAIN }}' '${{ secrets.CERTBOT_EMAIL }}'"
 
       - name: Health check
         run: |
