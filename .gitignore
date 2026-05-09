@@ -37,3 +37,4 @@ docker-compose.override.yml
 # Personal / Misc files
 launch-terminal
 *.cv.pdf
+docs/planning/PERSON.md

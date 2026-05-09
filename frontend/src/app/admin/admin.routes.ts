@@ -67,6 +67,11 @@ export const adminRoutes: Routes = [
         loadComponent: () =>
           import('./pages/semesters/semesters-list.component').then(m => m.SemestersListComponent),
       },
+      {
+        path: 'ai-assistant',
+        loadComponent: () =>
+          import('./pages/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
+      },
     ],
   },
 ];

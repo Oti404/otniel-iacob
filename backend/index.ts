@@ -13,6 +13,8 @@ import contentRouter from './routes/content';
 import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
 import uploadRouter from './routes/upload';
+import internalRouter from './routes/internal';
+import aiChatRouter from './routes/ai-chat';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -60,6 +62,8 @@ app.use('/api', contentRouter);
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/admin/upload', uploadRouter);
+app.use('/api/internal', internalRouter);
+app.use('/api/admin/ai-chat', aiChatRouter);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
