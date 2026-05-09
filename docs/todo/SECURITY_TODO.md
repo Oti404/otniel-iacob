@@ -1,12 +1,57 @@
 # Security Remediation TODOs
 
-Aceste sarcini au fost extrase din auditul `THREAT_MATRIX.md` și trebuie implementate de către agenții responsabili.
+---
 
-## [x] 1. Extragerea Secretelor Hardcodate (Responsabil: **DevOps**)
-- **Vulnerabilitate:** Secrete hardcodate în `docker-compose.yml` (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `DB_POSTGRESDB_PASSWORD`).
-- **Acțiune Necesară:** La momentul configurării CI/CD, agentul DevOps trebuie să extragă aceste variabile într-un sistem de gestiune a secretelor (ex: AWS Secrets Manager). Fișierul `docker-compose.yml` va rămâne strict pentru execuția locală.
+## [x] 1. Extragerea Secretelor Hardcodate (DevOps)
+Secrete hardcodate în `docker-compose.yml` extrase în GitHub Secrets. Pipeline-ul de deploy scrie `.env` pe EC2 exclusiv din secrets.
 
-## [x] 2. Fixarea Versiunii Angular CLI (Responsabil: **Coder**)
-- **Vulnerabilitate:** Instalare non-deterministă a Angular CLI în containerul de dezvoltare.
-- **Locație:** `.devcontainer/devcontainer.json` -> `"postCreateCommand": "npm install -g @angular/cli && npm install"`
-- **Acțiune Necesară:** Agentul Coder trebuie să modifice comanda de instalare pentru a specifica o versiune fixă (ex: `@angular/cli@21.0.4` având în vedere că proiectul e generat cu v21). Aceasta previne riscurile de tip supply chain și problemele de compatibilitate viitoare.
+## [x] 2. Fixarea Versiunii Angular CLI (Coder)
+Versiunea Angular CLI fixată în `.devcontainer/devcontainer.json`.
+
+## [x] 3. Protecție startup la secrete lipsă (2026-05-09)
+Backend crashează la boot dacă `JWT_SECRET`, `JWT_REFRESH_SECRET` sau `INTERNAL_API_KEY` lipsesc sau au sub 16 caractere.  
+**Fișier:** `backend/index.ts`
+
+## [x] 4. Timing-safe comparison pentru Internal API Key (2026-05-09)
+Înlocuit comparare directă (`===`) cu `crypto.timingSafeEqual` — previne timing attacks pe secretul intern.  
+**Fișier:** `backend/routes/internal.ts`
+
+## [x] 5. Validare Zod pe toate rutele (2026-05-09)
+Adăugată validare Zod pe `/api/internal/*` și `/api/admin/ai-chat` — anterior acceptau input arbitrar.  
+**Fișiere:** `backend/routes/internal.ts`, `backend/routes/ai-chat.ts`
+
+## [x] 6. Upload: extension whitelist + rate limiting (2026-05-09)
+- Whitelist extensii (`.jpg`, `.png`, `.pdf` etc.) aplicată împreună cu MIME type check — fișier `.exe` cu MIME `image/png` nu mai trece
+- Rate limiter: max 30 upload-uri/oră per IP  
+**Fișier:** `backend/routes/upload.ts`
+
+## [x] 7. Prisma: protecție NaN în id() (2026-05-09)
+`parseInt('abc')` returna NaN și ajungea în query Prisma. Acum aruncă eroare și returnează 400.  
+**Fișier:** `backend/routes/admin.ts`
+
+## [x] 8. Global error handler (2026-05-09)
+Excepții neprins aruncau stack trace complet la client. Handler global adăugat la finalul `index.ts`.  
+**Fișier:** `backend/index.ts`
+
+## [x] 9. db push --accept-data-loss eliminat (2026-05-09)
+Înlocuit cu `prisma migrate deploy` în `Dockerfile.prod` — nu mai poate șterge date la restart.  
+**Fișier:** `backend/Dockerfile.prod`
+
+## [x] 10. nginx security headers (2026-05-09)
+`server_tokens off`, `X-Frame-Options`, `X-Content-Type-Options`, `X-XSS-Protection`, `Referrer-Policy`, `HSTS` (pe HTTPS).  
+**Fișiere:** `scripts/nginx-prod.conf`, `scripts/nginx-prod-ssl.conf`
+
+---
+
+## [ ] 11. Rotire credențiale (acțiune manuală necesară)
+Credențialele din `.env`-ul local trebuie rotate dacă au circulat în afara mașinii locale:
+- `JWT_SECRET`, `JWT_REFRESH_SECRET` — `openssl rand -hex 32`
+- `ADMIN_PASSWORD`
+- `INTERNAL_API_KEY` — `openssl rand -hex 32`
+- `PORTFOLIO_N8N_PROJECT_INTAKE` (Google API key) — regenerare din Google Cloud Console
+
+## [ ] 12. Migrare la AWS Secrets Manager (viitor)
+Secretele sunt acum în GitHub Secrets (acceptabil). La migrare pe ECS Fargate, trebuie mutate în AWS Secrets Manager.
+
+## [ ] 13. E2E tests pentru fluxuri critice (viitor)
+Login, creare proiect, upload fișier — niciun test automat nu acoperă aceste fluxuri.

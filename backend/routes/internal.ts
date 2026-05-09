@@ -90,7 +90,14 @@ router.post('/projects', async (req: Request, res: Response) => {
 
     const project = await prisma.project.create({
       data: {
-        ...rest,
+        name: rest.name,
+        description: rest.description,
+        tech: rest.tech,
+        status: rest.status,
+        display: rest.display ?? true,
+        link: rest.link ?? null,
+        liveLink: rest.liveLink ?? null,
+        awards: rest.awards ?? null,
         date: new Date(date),
         endDate: endDate ? new Date(endDate) : null,
         order: nextOrder,

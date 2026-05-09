@@ -1,38 +1,111 @@
 # Operations & Deployment Guide
 
-This document covers everything related to running, syncing, and deploying the portfolio project.
+Ghid operațional real pentru proiectul portfolio — cum se deployează, cum se accesează, ce trebuie configurat.
 
 ---
 
-## 1. Deployment Guide
-**Prerequisites**: Docker, Node.js, Access credentials.
+## 1. Deployment automat (GitHub Actions)
 
-**Steps**:
-1. Build the project.
-2. Deploy the backend.
-3. Deploy the frontend.
-4. Verify Deployment.
+Orice push pe `main` declanșează automat pipeline-ul de deploy:
 
-**Rollback**: Revert to previous stable version in case of failure.
+```
+push → main
+  ├── npm ci + build frontend (CI check)
+  ├── SSH la EC2
+  ├── setup-ec2.sh    — instalare Docker (skip dacă există)
+  ├── setup-nginx.sh  — instalare nginx + SSL (idempotent)
+  ├── scrie .env din GitHub Secrets
+  ├── rsync fișiere la ~/app/
+  ├── docker compose -f docker-compose.prod.yml up -d --build
+  └── curl localhost:3000/api/health  (health check)
+```
 
----
-
-## 2. Project Synchronization
-**GitHub**: `git pull origin main` to sync with remote.
-**Database**: Pull latest schema/seed data locally.
-**Environment**: Safely update `.env` files.
-
----
-
-## 3. External Deployment Sites
-**Frontend**: [Vercel/Netlify/Render]
-**Backend**: [Render/Heroku/AWS]
-**Database**: [Supabase/MongoDB Atlas]
-**Automation**: n8n hosted on [Provider].
+**Workflow:** `.github/workflows/deploy-aws.yml`
 
 ---
 
-## 4. GitHub Repository Info
-**Branching**: `main` (stable), `dev` (active development), `feature/*`.
-**Pull Requests**: PR against `dev`, pass tests/linters, request reviews.
-**Issues**: Use bug/feature labels.
+## 2. Infrastructură curentă (EC2)
+
+| Componentă | Locație | Port |
+|---|---|---|
+| nginx (host) | EC2 Ubuntu | 80 (public), 443 când SSL activ |
+| Frontend (Docker) | 127.0.0.1:8080 | intern |
+| Backend Express (Docker) | 127.0.0.1:3000 | intern |
+| PostgreSQL (Docker) | intern (fără port extern) | intern |
+| n8n (Docker) | 127.0.0.1:5678 | intern, acces via SSH tunnel |
+
+**Server:** AWS EC2 `13.60.216.226`  
+**Acces SSH:** `ssh -i key.pem ubuntu@13.60.216.226`  
+**Acces n8n:** `ssh -i key.pem -N -L 5678:127.0.0.1:5678 ubuntu@13.60.216.226` → browser la `http://localhost:5678`
+
+---
+
+## 3. GitHub Secrets necesare
+
+| Secret | Valoare exemplu | Obligatoriu |
+|---|---|---|
+| `EC2_SSH_KEY` | conținut fișier `.pem` | da |
+| `EC2_USERNAME` | `ubuntu` | da |
+| `EC2_HOST` | `13.60.216.226` | da |
+| `POSTGRES_USER` | `admin` | da |
+| `POSTGRES_PASSWORD` | parolă puternică | da |
+| `POSTGRES_DB` | `monorepodb` | da |
+| `JWT_SECRET` | min 32 chars random | da |
+| `JWT_REFRESH_SECRET` | min 32 chars random | da |
+| `ADMIN_PASSWORD` | parola panoului admin | da |
+| `ALLOWED_ORIGINS` | `http://13.60.216.226` | da |
+| `INTERNAL_API_KEY` | min 32 chars random | da |
+| `N8N_WEBHOOK_ID` | UUID din workflow n8n | da |
+| `EC2_DOMAIN` | `portofoliu.ro` | opțional — activează SSL |
+| `CERTBOT_EMAIL` | email pentru Let's Encrypt | opțional — cu EC2_DOMAIN |
+
+**Generare secret random:** `openssl rand -hex 32`
+
+---
+
+## 4. Upgrade la HTTPS (când ai domeniu)
+
+1. DNS: A record `portofoliu.ro` → `13.60.216.226`
+2. GitHub Secrets: adaugă `EC2_DOMAIN=portofoliu.ro` și `CERTBOT_EMAIL=email@gmail.com`
+3. Actualizează `ALLOWED_ORIGINS=https://portofoliu.ro`
+4. Push orice modificare pe `main` — certbot obține cert automat, nginx trece pe HTTPS
+
+---
+
+## 5. Comenzi utile pe EC2
+
+```bash
+# Status containere
+sudo docker compose -f ~/app/docker-compose.prod.yml ps
+
+# Logs backend
+sudo docker compose -f ~/app/docker-compose.prod.yml logs backend -f
+
+# Restart un serviciu
+sudo docker compose -f ~/app/docker-compose.prod.yml restart backend
+
+# Health check manual
+curl http://localhost:3000/api/health
+
+# Status nginx
+sudo systemctl status nginx
+sudo nginx -t   # validare config
+```
+
+---
+
+## 6. Rollback
+
+```bash
+# Pe EC2 — revert la imaginea anterioară
+cd ~/app
+git log --oneline -5
+git checkout <commit-hash>
+sudo docker compose -f docker-compose.prod.yml up -d --build
+```
+
+---
+
+## 7. Arhitectura viitoare (planificată)
+
+Documentul `docs/infrastructure/AWS_DEPLOYMENT.md` descrie planul de migrare la ECS Fargate + RDS pentru scalabilitate. Configurarea curentă EC2 single-instance este suficientă pentru un portfolio personal.

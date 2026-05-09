@@ -48,7 +48,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
   }
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { sub: number };
+    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as unknown as { sub: number };
     const user = await prisma.adminUser.findUnique({ where: { id: payload.sub } });
     if (!user) {
       res.status(401).json({ message: 'User not found' });
