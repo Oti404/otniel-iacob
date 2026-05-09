@@ -56,6 +56,10 @@ jobs:
           JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
           ALLOWED_ORIGINS=http://${{ secrets.EC2_HOST }}
+          INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
+          N8N_CHAT_WEBHOOK_URL=http://n8n:5678/webhook/${{ secrets.N8N_WEBHOOK_ID }}/chat
+          N8N_HOST=${{ secrets.EC2_HOST }}
+          N8N_WEBHOOK_URL=http://${{ secrets.EC2_HOST }}:5678/
           ENVEOF
           "
 
