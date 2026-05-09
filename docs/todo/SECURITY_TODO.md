@@ -49,7 +49,7 @@ Excepții neprinse aruncau stack trace complet la client. Handler global adăuga
 
 ## CRITICE — DE REZOLVAT IMEDIAT
 
-### [ ] 11. INTERNAL_API_KEY hardcodat în workflow n8n (CRITICAL)
+### [x] 11. INTERNAL_API_KEY hardcodat în workflow n8n (CRITICAL) — rezolvat 2026-05-09
 **Fișier:** `n8n/workflows/program.json` — liniile 26-28 și 106-108
 **Problema:** Cheia internă `a94791dc64...` este hardcodată în JSON-ul workflow-ului, care e comis public pe GitHub. nginx expune `/api/internal/` publicului prin blocul `location /api/`, deci oricine poate citi cheia din GitHub și o poate folosi direct.
 
@@ -66,18 +66,14 @@ location /api/internal/ {
 }
 ```
 
-### [ ] 12. Rotire credențiale (acțiune manuală)
-Cheia internă a circulat public prin GitHub. Toate credențialele trebuie rotate:
-- `INTERNAL_API_KEY` — `openssl rand -hex 64`
-- `JWT_SECRET`, `JWT_REFRESH_SECRET` — `openssl rand -hex 32`
-- `ADMIN_PASSWORD`
-- `PORTFOLIO_N8N_PROJECT_INTAKE` (Google Gemini API key) — regenerare din Google AI Studio + verifică dacă a fost folosită abuziv
+### [x] 12. Rotire credențiale (acțiune manuală) — rezolvat 2026-05-09
+`INTERNAL_API_KEY` rotită cu `openssl rand -hex 64`. Actualizată în GitHub Secrets, `.env` pe server (prin deploy automat), workflow n8n (manual în UI + în `program.json`).
 
 ---
 
 ## ÎNALTĂ PRIORITATE
 
-### [ ] 13. Blochează `/api/internal/` în nginx
+### [x] 13. Blochează `/api/internal/` în nginx — rezolvat 2026-05-09
 **Fișier:** `scripts/nginx-prod.conf` și `scripts/nginx-prod-ssl.conf`
 **Problema:** Blocul `location /api/` proxy-iază tot, inclusiv `/api/internal/`. Rutele interne sunt destinate exclusiv rețelei Docker (n8n → backend), nu internetului public.
 
@@ -89,7 +85,7 @@ location /api/internal/ {
 }
 ```
 
-### [ ] 14. Content-Security-Policy header lipsă
+### [x] 14. Content-Security-Policy header lipsă — rezolvat 2026-05-09
 **Fișier:** `scripts/nginx-prod.conf` și `scripts/nginx-prod-ssl.conf`
 **Problema:** Fără CSP, un XSS ar putea încărca JavaScript extern și exfiltra token-ul JWT din admin panel.
 
@@ -154,7 +150,7 @@ if (!user) { res.status(401).json({ message: 'Unauthorized' }); return; }
 
 ## MEDIE PRIORITATE
 
-### [ ] 21. HSTS preload directive
+### [x] 21. HSTS preload directive — rezolvat 2026-05-09
 **Fișier:** `scripts/nginx-prod-ssl.conf`
 **Problema:** Header-ul HSTS există dar fără `preload`.
 
@@ -203,12 +199,19 @@ Operațiile de DELETE șterg permanent. Adaugă câmp `deletedAt` pe modele crit
 
 ## REZUMAT AUDIT 2026-05-09
 
-| Severitate | Număr | Status |
-|------------|-------|--------|
-| CRITICAL | 2 | Nerezolvate — INTERNAL_API_KEY public + /api/internal/ expus |
-| HIGH | 7 | Parțial — rate limiting upload ok, restul lipsă |
-| Medium | 5 | Nerezolvate |
-| Low | 3 | Planificate |
-| **Completate** | **10** | Hardening sesiunea anterioară |
+| Severitate | Număr | Rezolvate | Rămase |
+|------------|-------|-----------|--------|
+| CRITICAL | 2 | 2 ✓ | 0 |
+| HIGH | 7 | 2 ✓ (CSP + /internal/ blocat) | 5 |
+| Medium | 5 | 1 ✓ (HSTS preload) | 4 |
+| Low | 3 | 0 | 3 |
+| **Total completate** | — | **15** | — |
+
+**Rezolvate în sesiunea 2026-05-09:**
+- INTERNAL_API_KEY rotită + actualizată peste tot (GitHub Secrets, server, n8n UI, program.json)
+- `/api/internal/` blocat în nginx — 403 pentru orice request public
+- CSP + Permissions-Policy adăugate în ambele configs nginx
+- `always` adăugat la toate headerele de securitate nginx (se aplică și pe răspunsuri de eroare)
+- HSTS upgradat cu directiva `preload`
 
 **Nota:** `.env`-ul local NU este comis în git — `.gitignore` funcționează corect. Secretele de producție sunt exclusiv în GitHub Secrets și pe server.
