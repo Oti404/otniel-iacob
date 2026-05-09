@@ -1,73 +1,114 @@
-# PortofoliuPersonal
+# Personal Portfolio — Monorepo
 
-**Welcome to my personal portfolio project.** While its primary purpose is to serve as a personal website, it has been built as a highly advanced technical sandbox to demonstrate enterprise-grade architecture, strict AI-assisted development workflows, and DevSecOps practices.
+Angular 21 + Node.js/Express + Prisma + PostgreSQL + n8n, deployed on AWS EC2.
 
-> **⚠️ IMPORTANT ARCHITECTURE NOTE**
-> This is not a standard Angular application. This project is a **Monorepo Ecosystem** designed for an AI-assisted development workflow (incorporating Angular, n8n, Node/Python, PostgreSQL + Prisma ORM, and AWS). 
-> 
-> **To understand what this project actually is and how it works, you MUST read the documentation in the `docs/` folder:**
-> - 🤖 [`docs/AGENTS.md`](./docs/AGENTS.md) - The Chain of Command for AI Agents
-> - 🏗️ [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) - Project Directory Structure
-> - 🚀 [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) - Deployment and Operations
-> 
-> Please inspect all `.md` files in the `docs/` directory before proceeding.
+Built as both a personal portfolio and a technical sandbox for AI-assisted development workflows, DevSecOps practices, and automation.
 
 ---
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+## Stack
 
-## Development server
+| Layer | Technology |
+|---|---|
+| Frontend | Angular 21, SCSS, Nginx |
+| Backend | Node.js, Express, TypeScript |
+| Database | PostgreSQL 15, Prisma ORM |
+| Automation | n8n (self-hosted) |
+| Auth | JWT (access token in memory + httpOnly refresh cookie) |
+| Infrastructure | Docker Compose (local), AWS EC2 (prod) |
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
+## Project Structure
+
+```
+/
+├── frontend/     Angular application
+├── backend/      Express API + file upload
+├── shared/       TypeScript interfaces + Zod schemas (source of truth for types)
+├── database/     Prisma schema, migrations, seed script
+├── n8n/          Workflow exports
+├── e2e/          End-to-end tests
+├── scripts/      Dev/build/deploy automation
+└── docs/         Architecture decisions, sprints, agent wardrobe
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## Local Development
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Prerequisites
 
-```bash
-ng generate component component-name
-```
+- Docker Desktop (running)
+- Node.js 20+
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+### 1. Environment
 
 ```bash
-ng build
+cp .env.example .env
+# Fill in: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, JWT_SECRET, JWT_REFRESH_SECRET, ADMIN_PASSWORD
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### 2. Run
 
-## Running unit tests
+**Option A — Windows (recommended)**
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+```bat
+run.bat
+```
+
+Choose `[1]` for full Docker (no live reload) or `[2]` for hybrid mode (Docker for DB/n8n, npm for apps with live reload).
+
+**Option B — Manual**
 
 ```bash
-ng test
+# Hybrid mode: DB + n8n in Docker, apps locally
+docker-compose up -d postgres n8n
+npm install
+npm run dev
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
 
 ```bash
-ng e2e
+# Full Docker
+docker-compose up -d --build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Ports
 
-## Additional Resources
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:80 (Docker) / http://localhost:4200 (dev) |
+| Backend API | http://localhost:3000 |
+| Admin Panel | http://localhost:80/admin |
+| n8n | http://localhost:5678 |
+| PostgreSQL | localhost:5433 |
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Seed the database
+
+```bash
+cd database
+npm run seed
+```
+
+---
+
+## NPM Workspaces
+
+Root `package.json` wires `frontend`, `backend`, `shared`, and `database` as workspaces.
+
+```bash
+npm run dev            # Start frontend + backend concurrently
+npm run dev:frontend   # Frontend only
+npm run dev:backend    # Backend only
+npm run build:all      # Build shared → backend → frontend
+```
+
+---
+
+## Documentation
+
+- [`docs/AGENTS.md`](./docs/AGENTS.md) — AI agent chain of command (Architect → Planner → Coder → Reviewer → Security Officer → DevOps)
+- [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) — Directory structure and conventions
+- [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) — Deployment and sync guide
+- [`docs/sprints/`](./docs/sprints/) — Sprint plans (SPRINT-01 through SPRINT-03)
+- [`docs/infrastructure/`](./docs/infrastructure/) — AWS architecture and EC2 setup

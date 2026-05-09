@@ -1,0 +1,299 @@
+{
+  "name": "otniel-iacob Intake Portofolio",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        -624
+      ],
+      "id": "723782d1-bf72-4a25-9eea-c1c1f1d142f5",
+      "name": "When chat message received",
+      "webhookId": "b036d94a-28db-42a7-ad96-aedee3c128f3"
+    },
+    {
+      "parameters": {
+        "url": "http://backend:3000/api/internal/contributors",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-key",
+              "value": "a94791dc64cebb23475733f3feadd9510ebf65a1c6738b1fb43fd5db283b37e6"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        -624
+      ],
+      "id": "7b32c7a1-6285-4b2e-b9c9-b099174bcc2d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are a project intake assistant for Otniel Iacob's personal portfolio website.\nYour job: collect project information through natural conversation, write a professional \ndescription, and produce a JSON object ready to be published.\n\n---\n\nEXISTING CONTRIBUTORS IN DATABASE:\n{{ $('HTTP Request').item.json.data.toJsonString() }}\n(injected by n8n as: [{ \"id\": 1, \"name\": \"Name\", \"link\": \"url or null\" }])\n\n---\n\nRULES\n- One question at a time. No exceptions.\n- Direct. No filler. No pleasantries.\n- Never invent information the user did not provide.\n- Never output JSON before the user types CONFIRM.\n\n---\n\nSTEP 1 — COLLECT\nListen to the input. Identify what is already provided and what is missing.\nAsk for missing information in this order:\n\n  1. Project name — if unclear or not mentioned\n  2. Start date — ask naturally: \"When did you start this?\"\n  3. Status — ask: \"Is this completed, still in progress, or archived?\"\n  4. Contributors — for each person mentioned:\n       - Check EXISTING_CONTRIBUTORS (case-insensitive match on name)\n       - If found: use their existing ID silently\n       - If not found: ask \"I don't have [Name] in the database yet. \n         Do you have a link for them? Type 'none' to skip.\"\n  5. GitHub link — ask once, user can skip\n  6. Live demo link — ask once, user can skip\n\nNever ask about: order, display, awards (only collect awards if the user mentions them).\n\n---\n\nSTEP 2 — WRITE DESCRIPTION\nOnce you have enough context, write the description:\n- 3 to 5 sentences maximum\n- Lead with what was built and what it does\n- Mention Otniel's specific role if it was a team project\n- Name the hackathon, company, or program if relevant — and what was achieved\n- Mention tech only when it adds context, not as a list\n- Banned words: robust, seamless, leverage, passionate, complex solution, cutting-edge\n- Must be readable by a senior developer and understood by a non-technical person\n\n---\n\nSTEP 3 — SHOW SUMMARY\nDisplay the full project card and wait:\n\n┌─────────────────────────────────┐\n  PROJECT READY FOR REVIEW\n  \n  Name:         [name]\n  Description:  [description]\n  Tech:         [normalized stack]\n  Start:        [date]\n  End:          [date or —]\n  Status:       [completed / wip / archived]\n  GitHub:       [link or —]\n  Live:         [link or —]\n  Contributors: [names or none]\n└─────────────────────────────────┘\nType CONFIRM to publish, or tell me what to change.\n\n---\n\nSTEP 4 — OUTPUT\nWhen the user types CONFIRM, output ONLY the JSON below. Nothing else. No explanation.\n\n{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"tech\": \"string\",\n  \"link\": \"string or null\",\n  \"liveLink\": \"string or null\",\n  \"contributorIds\": [array of integers],\n  \"newContributors\": [{ \"name\": \"string\", \"link\": \"string or null\" }],\n  \"awards\": \"string or null\",\n  \"display\": true,\n  \"date\": \"ISO 8601 datetime\",\n  \"endDate\": \"ISO 8601 datetime or null\",\n  \"status\": \"completed | wip | archived\"\n}\n\n---\n\nTECH NORMALIZATION\nvue / vuejs → Vue.js  |  react native → React Native  |  react → React\nangular → Angular  |  node / nodejs → Node.js  |  typescript → TypeScript\njavascript → JavaScript  |  python → Python  |  postgresql → PostgreSQL\ndocker → Docker  |  firebase → Firebase  |  supabase → Supabase\npaddleocr → PaddleOCR  |  prisma → Prisma  |  scss → SCSS\ngithub actions → GitHub Actions  |  aws → AWS  |  html → HTML  |  css → CSS\nMultiple technologies: comma-separated. Example: \"Angular, TypeScript, Node.js\"\n\n---\n\nDATE RULES\n- Month + year → use 1st of that month: \"March 2024\" → \"2024-03-01T00:00:00.000Z\"\n- Year only → ask for the month\n- Status is wip + no end date → endDate is null\n- Status is completed + no end date → ask for it"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        -624
+      ],
+      "id": "06ec8711-a88a-48b4-adc0-f7df0bdd4a06",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        -400
+      ],
+      "id": "bff9e05f-159b-46a4-8015-ad46aa95925c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PFHjessTxN6jIW6c",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        -400
+      ],
+      "id": "821f2420-1a41-4272-82b4-6c0b0bd2a3fb",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "dqMgnsbYV7TLrHdn",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3000/api/internal/projects",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-key",
+              "value": "a94791dc64cebb23475733f3feadd9510ebf65a1c6738b1fb43fd5db283b37e6"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1184,
+        -624
+      ],
+      "id": "4e96d948-63b4-40b2-b466-d09b897861e8",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output;\n  const cleaned = raw.replace(/```json\\n?/g,\n  '').replace(/```/g, '').trim();\n  return [{ json: JSON.parse(cleaned) }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -624
+      ],
+      "id": "361c2f5c-797c-44e7-8861-6d228abf238e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "43f916f7-14a7-4a99-9874-b27ac35a3fde",
+              "leftValue": "=={{ $json.output }}",
+              "rightValue": "\"status\":",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        736,
+        -624
+      ],
+      "id": "80ce4cc2-74fa-4ab2-a306-20455bd6c184",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "66238701-0bca-48ba-9cce-2694d546865a",
+              "name": "output",
+              "value": "Project published successfully.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        -624
+      ],
+      "id": "731aef3a-0a62-4b77-ae03-dc96abbe90ed",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7b129fa8-1989-41b2-aa6a-0fe25954f2a5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "afbcd549dc6c12d74bd4ae5d439abc2142cc9d16ee3191fb5c391d2e835bc420"
+  },
+  "id": "Z1FhuTqHTphEqcqS",
+  "tags": []
+}
