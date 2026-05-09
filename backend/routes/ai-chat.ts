@@ -7,7 +7,7 @@ router.use(authMiddleware);
 
 const chatSchema = z.object({
   message: z.string().min(1).max(5000),
-  sessionId: z.string().uuid(),
+  sessionId: z.string().min(1).max(100),
 });
 
 router.post('/', async (req: Request, res: Response) => {
