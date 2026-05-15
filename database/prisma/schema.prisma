@@ -111,12 +111,6 @@ model Hobby {
   order       Int    @default(0)
 }
 
-model HealthCheck {
-  id        Int      @id @default(autoincrement())
-  status    String
-  timestamp DateTime @default(now())
-}
-
 // ─── ENUMS ───────────────────────────────────────────────────────────────────
 
 enum ProjectStatus {

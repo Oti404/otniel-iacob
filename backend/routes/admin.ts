@@ -1,3 +1,12 @@
+/**
+ * Admin CRUD routes — all endpoints require a valid JWT Bearer token.
+ *
+ * Helper `id()` parses :id params and throws on NaN or values < 1,
+ * preventing invalid IDs from ever reaching Prisma queries.
+ *
+ * Semesters: DELETE cascades to all child Subjects (handled manually before Prisma delete).
+ * Projects:  contributors M:M rows are replaced atomically on PUT (delete-then-createMany).
+ */
 import { Router, Request, Response } from 'express';
 import { prisma, Prisma } from '@monorepo/database';
 import { authMiddleware } from '../middleware/auth';
@@ -146,18 +155,20 @@ router.put('/contributors/:id', async (req: Request, res: Response) => {
 });
 
 router.delete('/contributors/:id', async (req: Request, res: Response) => {
+  const cid = id(req);
   try {
-    await prisma.contributor.delete({ where: { id: id(req) } });
-    res.json({ data: { id: id(req) } });
+    await prisma.contributor.delete({ where: { id: cid } });
+    res.json({ data: { id: cid } });
   } catch {
     res.status(404).json({ message: 'Contributor not found' });
   }
 });
 
 router.delete('/projects/:id', async (req: Request, res: Response) => {
+  const pid = id(req);
   try {
-    await prisma.project.delete({ where: { id: id(req) } });
-    res.json({ data: { id: id(req) } });
+    await prisma.project.delete({ where: { id: pid } });
+    res.json({ data: { id: pid } });
   } catch {
     res.status(404).json({ message: 'Project not found' });
   }
@@ -204,9 +215,10 @@ router.put('/experience/:id', async (req: Request, res: Response) => {
 });
 
 router.delete('/experience/:id', async (req: Request, res: Response) => {
+  const eid = id(req);
   try {
-    await prisma.experience.delete({ where: { id: id(req) } });
-    res.json({ data: { id: id(req) } });
+    await prisma.experience.delete({ where: { id: eid } });
+    res.json({ data: { id: eid } });
   } catch {
     res.status(404).json({ message: 'Experience not found' });
   }
@@ -238,9 +250,10 @@ router.put('/hobbies/:id', async (req: Request, res: Response) => {
 });
 
 router.delete('/hobbies/:id', async (req: Request, res: Response) => {
+  const hid = id(req);
   try {
-    await prisma.hobby.delete({ where: { id: id(req) } });
-    res.json({ data: { id: id(req) } });
+    await prisma.hobby.delete({ where: { id: hid } });
+    res.json({ data: { id: hid } });
   } catch {
     res.status(404).json({ message: 'Hobby not found' });
   }
@@ -323,9 +336,10 @@ router.put('/subjects/:id', async (req: Request, res: Response) => {
 });
 
 router.delete('/subjects/:id', async (req: Request, res: Response) => {
+  const sid = id(req);
   try {
-    await prisma.subject.delete({ where: { id: id(req) } });
-    res.json({ data: { id: id(req) } });
+    await prisma.subject.delete({ where: { id: sid } });
+    res.json({ data: { id: sid } });
   } catch {
     res.status(404).json({ message: 'Subject not found' });
   }

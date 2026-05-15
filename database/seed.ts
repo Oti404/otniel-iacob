@@ -3,6 +3,14 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+type ContributorEntry = string | [string, string];
+
+function parseContributors(list: ContributorEntry[]): { name: string; link: string | null }[] {
+  return list.map((c) =>
+    Array.isArray(c) ? { name: c[0], link: c[1] ?? null } : { name: c, link: null }
+  );
+}
+
 async function main() {
   // ─── ADMIN USER ──────────────────────────────────────────────────────────────
   const adminPassword = process.env.ADMIN_PASSWORD;
@@ -158,6 +166,25 @@ async function main() {
       update: {},
       create: projectData,
     });
+  }
+
+  // Link contributors to projects (find-or-create by name, then upsert join row)
+  for (const project of projects) {
+    if (!project.contributors?.length) continue;
+    const projectId = projects.indexOf(project) + 1;
+    const parsed = parseContributors(project.contributors as ContributorEntry[]);
+
+    for (const c of parsed) {
+      let contributor = await prisma.contributor.findFirst({ where: { name: c.name } });
+      if (!contributor) {
+        contributor = await prisma.contributor.create({ data: { name: c.name, link: c.link } });
+      }
+      await prisma.projectContributor.upsert({
+        where: { projectId_contributorId: { projectId, contributorId: contributor.id } },
+        update: {},
+        create: { projectId, contributorId: contributor.id },
+      });
+    }
   }
 
   // ─── EXPERIENCE ──────────────────────────────────────────────────────────────

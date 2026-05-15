@@ -11,27 +11,12 @@ import { HealthStatus } from '@monorepo/shared';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  isMenuOpen = false;
-  backendStatus: HealthStatus | null = null;
   private http = inject(HttpClient);
 
   ngOnInit() {
     this.http.get<HealthStatus>('/api/health').subscribe({
-      next: (data) => {
-        this.backendStatus = data;
-        console.log('Backend connection successful:', data);
-      },
-      error: (err) => {
-        console.error('Failed to connect to backend', err);
-      }
+      next: (data) => console.log('Backend connection successful:', data),
+      error: (err) => console.error('Failed to connect to backend', err),
     });
-  }
-
-  toggleMenu() {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
-
-  closeMenu() {
-    this.isMenuOpen = false;
   }
 }

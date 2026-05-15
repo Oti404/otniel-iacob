@@ -1,6 +1,14 @@
+/**
+ * Internal API — used exclusively by n8n automation.
+ * Protected by x-internal-key header using crypto.timingSafeEqual,
+ * which prevents timing attacks that could leak the key length or value
+ * through response time differences.
+ *
+ * POST /projects supports inline newContributors creation (n8n sends names, not IDs).
+ */
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '@monorepo/database';
-import { contributorEntitySchema } from '@monorepo/shared';
+import { contributorEntitySchema, projectSchema } from '@monorepo/shared';
 import crypto from 'crypto';
 import { z } from 'zod';
 
@@ -25,17 +33,19 @@ function internalKeyMiddleware(req: Request, res: Response, next: NextFunction):
 
 router.use(internalKeyMiddleware);
 
-const internalProjectSchema = z.object({
+// Extends the shared projectSchema with:
+// - max-length constraints (n8n content can be verbose)
+// - date without .datetime() (n8n doesn't always send full ISO strings)
+// - display optional (defaults true when omitted)
+// - newContributors: n8n sends names, not IDs, so contributors can be created inline
+const internalProjectSchema = projectSchema.omit({ order: true }).extend({
   name: z.string().min(1).max(200),
   description: z.string().min(1).max(2000),
   tech: z.string().min(1).max(500),
-  link: z.string().url().optional().nullable(),
-  liveLink: z.string().url().optional().nullable(),
   awards: z.string().max(500).optional().nullable(),
   display: z.boolean().optional(),
   date: z.string().min(1),
   endDate: z.string().optional().nullable(),
-  status: z.enum(['completed', 'wip', 'archived']),
   contributorIds: z.array(z.number().int().positive()).optional(),
   newContributors: z.array(z.object({
     name: z.string().min(1).max(100),
