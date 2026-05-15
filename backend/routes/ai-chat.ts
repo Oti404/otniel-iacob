@@ -1,3 +1,10 @@
+/**
+ * AI chat proxy — JWT required.
+ * Forwards messages to the n8n chat webhook (N8N_CHAT_WEBHOOK_URL).
+ *
+ * n8n can return either an array [{output: string}] or a plain object {output: string};
+ * both formats are handled to accommodate different n8n node configurations.
+ */
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { z } from 'zod';

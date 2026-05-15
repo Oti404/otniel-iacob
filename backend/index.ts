@@ -1,3 +1,17 @@
+/**
+ * Backend entry point.
+ *
+ * Startup: crashes immediately if JWT_SECRET, JWT_REFRESH_SECRET, or INTERNAL_API_KEY
+ * are missing or shorter than 16 chars — misconfigured deploys fail fast rather than silently.
+ *
+ * Route layout:
+ *   GET  /api/health          — DB connectivity probe
+ *   GET  /api/*               — public content (no auth)
+ *   POST /api/auth/*          — login / refresh / logout (rate-limited)
+ *        /api/admin/*         — JWT-protected CRUD + upload + AI chat
+ *        /api/internal/*      — n8n automation (x-internal-key)
+ *   GET  /uploads/*           — static uploaded files
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });

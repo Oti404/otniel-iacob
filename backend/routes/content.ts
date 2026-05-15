@@ -1,3 +1,8 @@
+/**
+ * Public read-only routes — no authentication required.
+ * Note: GET /projects only returns rows where display=true.
+ * Hidden projects (display=false) are intentionally excluded from the public feed.
+ */
 import { Router, Request, Response } from 'express';
 import { prisma } from '@monorepo/database';
 import { ApiResponse, Contributor, Profile, Project, Experience, Semester, Hobby } from '@monorepo/shared';

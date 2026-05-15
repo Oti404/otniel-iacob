@@ -1,3 +1,12 @@
+/**
+ * File upload — JWT required, rate-limited to 30 uploads / hour.
+ *
+ * Both MIME type AND file extension are checked together.
+ * Checking only one is insufficient: browsers/clients can lie about MIME,
+ * and extensions can be spoofed — requiring both halves the attack surface.
+ *
+ * Stored as /uploads/{uuid}.{ext} to avoid filename collisions and path traversal.
+ */
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';

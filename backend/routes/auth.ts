@@ -1,3 +1,13 @@
+/**
+ * Auth routes — no JWT required, rate-limited at the app level (10 req / 15 min).
+ *
+ * Token strategy:
+ *   - Access token: JWT signed with JWT_SECRET, 15-min TTL, sent in response body
+ *   - Refresh token: JWT signed with JWT_REFRESH_SECRET, 7-day TTL, httpOnly cookie
+ *     (sameSite:strict, secure only in production)
+ *
+ * POST /refresh re-fetches the user from DB so deleted accounts are rejected immediately.
+ */
 import { Router, Request, Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';

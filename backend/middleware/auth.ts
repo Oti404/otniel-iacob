@@ -14,6 +14,7 @@ declare global {
   }
 }
 
+/** Verifies JWT Bearer token and attaches decoded payload to `req.user`. */
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
