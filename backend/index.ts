@@ -26,9 +26,14 @@ import { HealthStatus } from '@monorepo/shared';
 import contentRouter from './routes/content';
 import authRouter from './routes/auth';
 import adminRouter from './routes/admin';
+import adminChroniclesRouter from './routes/admin-chronicles';
 import uploadRouter from './routes/upload';
 import internalRouter from './routes/internal';
 import aiChatRouter from './routes/ai-chat';
+import chroniclesRouter from './routes/chronicles';
+import subscriberAuthRouter from './routes/subscriber-auth';
+import subscriptionsRouter from './routes/subscriptions';
+import pushRouter from './routes/push';
 
 // ─── Startup validation ───────────────────────────────────────────────────────
 const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'INTERNAL_API_KEY'];
@@ -82,8 +87,13 @@ if (!fs.existsSync(uploadsDir)) {
 app.use('/uploads', express.static(path.resolve(uploadsDir)));
 
 app.use('/api', contentRouter);
+app.use('/api', chroniclesRouter);
+app.use('/api/auth', subscriberAuthRouter);
 app.use('/api/auth', authLimiter, authRouter);
+app.use('/api/subscriptions', subscriptionsRouter);
+app.use('/api/push', pushRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/admin', adminChroniclesRouter);
 app.use('/api/admin/upload', uploadRouter);
 app.use('/api/internal', internalRouter);
 app.use('/api/admin/ai-chat', aiChatRouter);

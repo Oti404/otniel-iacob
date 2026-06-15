@@ -68,6 +68,36 @@ export const adminRoutes: Routes = [
           import('./pages/semesters/semesters-list.component').then(m => m.SemestersListComponent),
       },
       {
+        path: 'chronicles',
+        loadComponent: () =>
+          import('./pages/chronicles/chronicles-list.component').then((m) => m.ChroniclesListComponent),
+      },
+      {
+        path: 'chronicles/new',
+        loadComponent: () =>
+          import('./pages/chronicles/chronicle-form.component').then((m) => m.ChronicleFormComponent),
+      },
+      {
+        path: 'chronicles/:id',
+        loadComponent: () =>
+          import('./pages/chronicles/chronicle-form.component').then((m) => m.ChronicleFormComponent),
+      },
+      {
+        path: 'chronicles/:id/passages',
+        loadComponent: () =>
+          import('./pages/chronicles/passages-list.component').then((m) => m.PassagesListComponent),
+      },
+      {
+        path: 'chronicles/:id/passages/new',
+        loadComponent: () =>
+          import('./pages/chronicles/passage-form.component').then((m) => m.PassageFormComponent),
+      },
+      {
+        path: 'chronicles/:id/passages/:pid',
+        loadComponent: () =>
+          import('./pages/chronicles/passage-form.component').then((m) => m.PassageFormComponent),
+      },
+      {
         path: 'ai-assistant',
         loadComponent: () =>
           import('./pages/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),

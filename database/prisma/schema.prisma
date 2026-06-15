@@ -111,6 +111,85 @@ model Hobby {
   order       Int    @default(0)
 }
 
+// ─── ADVENTURES ──────────────────────────────────────────────────────────────
+
+model Chronicle {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  coverImage  String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  passages      Passage[]
+  subscriptions Subscription[]
+}
+
+model Passage {
+  id          Int       @id @default(autoincrement())
+  chronicleId Int
+  title       String
+  content     String?
+  order       Int       @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  chronicle Chronicle      @relation(fields: [chronicleId], references: [id], onDelete: Cascade)
+  media     PassageMedia[]
+}
+
+model PassageMedia {
+  id           Int       @id @default(autoincrement())
+  passageId    Int
+  url          String
+  cloudinaryId String?
+  type         MediaType
+  order        Int       @default(0)
+  caption      String?
+
+  passage Passage @relation(fields: [passageId], references: [id], onDelete: Cascade)
+}
+
+// ─── SUBSCRIBERS ─────────────────────────────────────────────────────────────
+
+model GoogleSubscriber {
+  id        Int      @id @default(autoincrement())
+  googleId  String   @unique
+  email     String   @unique
+  name      String
+  picture   String?
+  createdAt DateTime @default(now())
+
+  subscriptions     Subscription[]
+  pushSubscriptions PushSubscription[]
+}
+
+model Subscription {
+  id           Int              @id @default(autoincrement())
+  subscriberId Int
+  type         SubscriptionType
+  chronicleId  Int?
+  createdAt    DateTime         @default(now())
+
+  subscriber GoogleSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  chronicle  Chronicle?       @relation(fields: [chronicleId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriberId, type, chronicleId])
+}
+
+model PushSubscription {
+  id           Int      @id @default(autoincrement())
+  subscriberId Int
+  endpoint     String   @unique
+  p256dh       String
+  auth         String
+  createdAt    DateTime @default(now())
+
+  subscriber GoogleSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+}
+
 // ─── ENUMS ───────────────────────────────────────────────────────────────────
 
 enum ProjectStatus {
@@ -123,4 +202,15 @@ enum ExperienceType {
   job
   education
   event
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  YOUTUBE
+}
+
+enum SubscriptionType {
+  GLOBAL
+  CHRONICLE
 }

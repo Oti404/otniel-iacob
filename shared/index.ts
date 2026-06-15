@@ -101,6 +101,77 @@ export interface Hobby {
   order: number;
 }
 
+// ─── ADVENTURES ──────────────────────────────────────────────────────────────
+
+export type MediaType = 'IMAGE' | 'VIDEO' | 'YOUTUBE';
+export type SubscriptionType = 'GLOBAL' | 'CHRONICLE';
+
+export interface PassageMedia {
+  id: number;
+  passageId: number;
+  url: string;
+  cloudinaryId?: string | null;
+  type: MediaType;
+  order: number;
+  caption?: string | null;
+}
+
+export interface Passage {
+  id: number;
+  chronicleId: number;
+  title: string;
+  content?: string | null;
+  order: number;
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  media: PassageMedia[];
+}
+
+export interface Chronicle {
+  id: number;
+  title: string;
+  description?: string | null;
+  coverImage?: string | null;
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  passages?: Passage[];
+}
+
+// ─── SUBSCRIBERS ─────────────────────────────────────────────────────────────
+
+export interface GoogleSubscriber {
+  id: number;
+  googleId: string;
+  email: string;
+  name: string;
+  picture?: string | null;
+  createdAt: string;
+}
+
+export interface Subscription {
+  id: number;
+  subscriberId: number;
+  type: SubscriptionType;
+  chronicleId?: number | null;
+  createdAt: string;
+}
+
+export interface PushSubscription {
+  id: number;
+  subscriberId: number;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  createdAt: string;
+}
+
+export interface SubscriberTokenPayload {
+  sub: string;
+  email: string;
+}
+
 // ─── API RESPONSES ────────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

@@ -74,3 +74,35 @@ export const hobbySchema = z.object({
   link: z.string().min(1),
   order: z.number().int().default(0),
 });
+
+// ─── ADVENTURES ──────────────────────────────────────────────────────────────
+
+export const chronicleSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().nullable().optional(),
+  coverImage: z.string().url().nullable().optional(),
+});
+
+export const passageSchema = z.object({
+  title: z.string().min(1),
+  content: z.string().nullable().optional(),
+  order: z.number().int().default(0),
+});
+
+export const passageMediaSchema = z.object({
+  url: z.string().url(),
+  type: z.enum(['IMAGE', 'VIDEO', 'YOUTUBE']),
+  order: z.number().int().default(0),
+  caption: z.string().nullable().optional(),
+});
+
+export const subscriptionSchema = z.object({
+  type: z.enum(['GLOBAL', 'CHRONICLE']),
+  chronicleId: z.number().int().nullable().optional(),
+});
+
+export const pushSubscribeSchema = z.object({
+  endpoint: z.string().url(),
+  p256dh: z.string().min(1),
+  auth: z.string().min(1),
+});

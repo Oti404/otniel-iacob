@@ -1,0 +1,59 @@
+<div class="chronicle-page">
+  <div class="chr-topbar">
+    <a class="back-link" routerLink="/adventures">← ADVENTURES</a>
+  </div>
+
+  <div *ngIf="loading()" class="state-msg">Loading...</div>
+  <div *ngIf="error()" class="state-msg state-msg--error">{{ error() }}</div>
+
+  <ng-container *ngIf="!loading() && !error() && chronicle() as chr">
+    <header class="chr-header">
+      <div class="chr-cover" *ngIf="chr.coverImage">
+        <img [src]="chr.coverImage" [alt]="chr.title">
+        <div class="cover-overlay"></div>
+      </div>
+      <div class="chr-meta" [class.chr-meta--no-cover]="!chr.coverImage">
+        <h1 class="chr-title">{{ chr.title }}</h1>
+        <p class="chr-desc" *ngIf="chr.description">{{ chr.description }}</p>
+        <span class="chr-date">{{ chr.publishedAt | date:'MMMM d, yyyy' }}</span>
+      </div>
+    </header>
+
+    <main class="chr-content">
+      <p *ngIf="passages().length === 0" class="state-msg">No passages yet.</p>
+
+      <article class="passage" *ngFor="let p of passages(); let i = index; let last = last">
+        <div class="passage-header">
+          <span class="passage-num">{{ (i + 1).toString().padStart(2, '0') }}</span>
+          <h2 class="passage-title">{{ p.title }}</h2>
+          <span class="passage-date" *ngIf="p.publishedAt">{{ p.publishedAt | date:'MMM d' }}</span>
+        </div>
+
+        <div class="passage-content" *ngIf="p.content">{{ p.content }}</div>
+
+        <div class="media-gallery" *ngIf="p.media.length > 0">
+          <div class="media-item" *ngFor="let m of p.media">
+            <ng-container [ngSwitch]="m.type">
+              <img *ngSwitchCase="'IMAGE'" [src]="m.url" [alt]="m.caption || p.title" loading="lazy">
+              <video *ngSwitchCase="'VIDEO'" controls preload="metadata">
+                <source [src]="m.url">
+              </video>
+              <iframe
+                *ngSwitchCase="'YOUTUBE'"
+                [src]="m.embedUrl"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+              </iframe>
+            </ng-container>
+            <p class="media-caption" *ngIf="m.caption">{{ m.caption }}</p>
+          </div>
+        </div>
+
+        <hr class="passage-divider" *ngIf="!last">
+      </article>
+
+      <app-subscribe-panel [chronicleId]="chr.id"></app-subscribe-panel>
+    </main>
+  </ng-container>
+</div>

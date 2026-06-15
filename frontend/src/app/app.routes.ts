@@ -5,6 +5,10 @@ export const routes: Routes = [
   { path: '', component: PortfolioComponent },
   { path: 'home', redirectTo: '', pathMatch: 'full' },
   {
+    path: 'adventures',
+    loadChildren: () => import('./adventures/adventures.routes').then((m) => m.adventuresRoutes),
+  },
+  {
     path: 'admin',
     loadChildren: () => import('./admin/admin.routes').then((m) => m.adminRoutes),
   },

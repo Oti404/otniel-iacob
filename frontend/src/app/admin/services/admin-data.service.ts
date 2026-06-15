@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse, Contributor, Profile, Project, Experience, Semester, Hobby, Subject } from '@monorepo/shared';
+import { ApiResponse, Chronicle, Contributor, Passage, PassageMedia, Profile, Project, Experience, Semester, Hobby, Subject } from '@monorepo/shared';
 
 @Injectable({ providedIn: 'root' })
 export class AdminDataService {
@@ -68,6 +68,60 @@ export class AdminDataService {
   }
   deleteContributor(id: number): Observable<{ id: number }> {
     return this.http.delete<ApiResponse<{ id: number }>>(`/api/admin/contributors/${id}`).pipe(map((r) => r.data));
+  }
+
+  // ─── CHRONICLES ──────────────────────────────────────────────────────────────
+  getAdminChronicles(): Observable<(Chronicle & { passageCount: number })[]> {
+    return this.http.get<ApiResponse<(Chronicle & { passageCount: number })[]>>('/api/admin/chronicles').pipe(map((r) => r.data));
+  }
+  getAdminChronicle(id: number): Observable<Chronicle> {
+    return this.http.get<ApiResponse<Chronicle>>(`/api/admin/chronicles/${id}`).pipe(map((r) => r.data));
+  }
+  createChronicle(data: { title: string; description?: string | null; coverImage?: string | null }): Observable<Chronicle> {
+    return this.http.post<ApiResponse<Chronicle>>('/api/admin/chronicles', data).pipe(map((r) => r.data));
+  }
+  updateChronicle(id: number, data: { title: string; description?: string | null; coverImage?: string | null }): Observable<Chronicle> {
+    return this.http.put<ApiResponse<Chronicle>>(`/api/admin/chronicles/${id}`, data).pipe(map((r) => r.data));
+  }
+  deleteChronicle(id: number): Observable<{ id: number }> {
+    return this.http.delete<ApiResponse<{ id: number }>>(`/api/admin/chronicles/${id}`).pipe(map((r) => r.data));
+  }
+  publishChronicle(id: number): Observable<Chronicle> {
+    return this.http.post<ApiResponse<Chronicle>>(`/api/admin/chronicles/${id}/publish`, {}).pipe(map((r) => r.data));
+  }
+
+  // ─── PASSAGES ────────────────────────────────────────────────────────────────
+  createPassage(chronicleId: number, data: { title: string; content?: string | null; order: number }): Observable<Passage> {
+    return this.http.post<ApiResponse<Passage>>(`/api/admin/chronicles/${chronicleId}/passages`, data).pipe(map((r) => r.data));
+  }
+  updatePassage(pid: number, data: { title: string; content?: string | null; order: number }): Observable<Passage> {
+    return this.http.put<ApiResponse<Passage>>(`/api/admin/passages/${pid}`, data).pipe(map((r) => r.data));
+  }
+  deletePassage(pid: number): Observable<{ id: number }> {
+    return this.http.delete<ApiResponse<{ id: number }>>(`/api/admin/passages/${pid}`).pipe(map((r) => r.data));
+  }
+  publishPassage(pid: number): Observable<Passage> {
+    return this.http.post<ApiResponse<Passage>>(`/api/admin/passages/${pid}/publish`, {}).pipe(map((r) => r.data));
+  }
+
+  // ─── MEDIA ───────────────────────────────────────────────────────────────────
+  addYoutubeLink(pid: number, data: { url: string; caption?: string | null; order: number }): Observable<PassageMedia> {
+    return this.http.post<ApiResponse<PassageMedia>>(
+      `/api/admin/passages/${pid}/media`,
+      { url: data.url, type: 'YOUTUBE', order: data.order, caption: data.caption ?? null },
+    ).pipe(map((r) => r.data));
+  }
+  uploadPassageMedia(pid: number, file: File, caption?: string | null): Observable<PassageMedia> {
+    const form = new FormData();
+    form.append('file', file);
+    if (caption) form.append('caption', caption);
+    return this.http.post<ApiResponse<PassageMedia>>(`/api/admin/passages/${pid}/media/upload`, form).pipe(map((r) => r.data));
+  }
+  deleteMedia(mid: number): Observable<{ id: number }> {
+    return this.http.delete<ApiResponse<{ id: number }>>(`/api/admin/media/${mid}`).pipe(map((r) => r.data));
+  }
+  reorderMedia(mid: number, order: number): Observable<PassageMedia> {
+    return this.http.put<ApiResponse<PassageMedia>>(`/api/admin/media/${mid}/order`, { order }).pipe(map((r) => r.data));
   }
 
   // ─── SUBJECTS ────────────────────────────────────────────────────────────────

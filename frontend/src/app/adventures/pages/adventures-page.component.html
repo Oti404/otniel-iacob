@@ -1,0 +1,52 @@
+<div class="adventures-page">
+  <header class="adv-header">
+    <a class="back-link" routerLink="/">← PORTFOLIO</a>
+    <h1 class="adv-title">ADVENTURES</h1>
+    <p class="adv-sub">chronicles of where I've been</p>
+
+    <div class="auth-widget">
+      <ng-container *ngIf="auth.checked()">
+        <ng-container *ngIf="auth.subscriber() as sub; else loginBlock">
+          <img *ngIf="sub.picture" [src]="sub.picture" alt="" class="auth-avatar" (error)="$any($event.target).style.display='none'">
+          <span class="auth-name">{{ sub.name }}</span>
+          <button class="auth-btn" (click)="logout()">Logout</button>
+        </ng-container>
+        <ng-template #loginBlock>
+          <button class="auth-btn auth-btn--google" (click)="auth.loginWithGoogle()">
+            <span class="google-icon">G</span> Login with Google
+          </button>
+        </ng-template>
+      </ng-container>
+    </div>
+  </header>
+
+  <div *ngIf="authError" class="auth-error-banner">
+    Login failed. Please try again.
+  </div>
+
+  <main class="adv-content">
+    <div *ngIf="loading()" class="state-msg">Loading...</div>
+    <div *ngIf="error()" class="state-msg state-msg--error">{{ error() }}</div>
+
+    <ng-container *ngIf="!loading() && !error()">
+      <p *ngIf="chronicles().length === 0" class="state-msg">No chronicles yet. Check back soon.</p>
+
+      <div class="chronicles-grid" *ngIf="chronicles().length > 0">
+        <a class="chronicle-card" *ngFor="let c of chronicles()" [routerLink]="['/adventures', c.id]">
+          <div class="card-cover" [class.card-cover--empty]="!c.coverImage">
+            <img *ngIf="c.coverImage" [src]="c.coverImage" [alt]="c.title" loading="lazy">
+            <span *ngIf="!c.coverImage" class="cover-placeholder">{{ c.title[0] }}</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">{{ c.title }}</h2>
+            <p class="card-desc" *ngIf="c.description">{{ c.description }}</p>
+            <div class="card-meta">
+              <span class="meta-date">{{ c.publishedAt | date:'MMM yyyy' }}</span>
+              <span class="meta-count">{{ c.passageCount }} passage{{ c.passageCount !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </ng-container>
+  </main>
+</div>
