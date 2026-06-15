@@ -16,4 +16,10 @@ RUN cd database && npx prisma generate --schema prisma/schema.prisma
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "cd /app/database && (npx prisma migrate deploy --schema prisma/schema.prisma || (npx prisma migrate resolve --applied '20260502103912_add_content_schema' --schema prisma/schema.prisma && npx prisma migrate deploy --schema prisma/schema.prisma)) && npx ts-node --transpile-only seed.ts && cd /app/backend && npx ts-node --transpile-only index.ts"]
+CMD ["sh", "-c", "cd /app/database && \
+  npx prisma migrate resolve --rolled-back '20260515200623_remove_health_check' --schema prisma/schema.prisma 2>/dev/null; \
+  (npx prisma migrate deploy --schema prisma/schema.prisma || \
+  (npx prisma migrate resolve --applied '20260502103912_add_content_schema' --schema prisma/schema.prisma && \
+   npx prisma migrate deploy --schema prisma/schema.prisma)) && \
+  npx ts-node --transpile-only seed.ts && \
+  cd /app/backend && npx ts-node --transpile-only index.ts"]
