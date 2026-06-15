@@ -64,6 +64,16 @@ jobs:
           INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
           N8N_CHAT_WEBHOOK_URL=http://n8n:5678/webhook/${{ secrets.N8N_WEBHOOK_ID }}/chat
           N8N_WEBHOOK_URL=http://localhost:5678/
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+          VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY=${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT=${{ secrets.VAPID_SUBJECT }}
           ENVEOF
           "
 
