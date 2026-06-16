@@ -65,12 +65,6 @@ app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { message: 'Too many requests, please try again later.' },
-});
-
 // Subscriber-auth (Google OAuth + /subscriber/me polling) is unauthenticated
 // and was previously unthrottled. More generous than the admin limiter since
 // legit subscribers poll /subscriber/me, but still bounds anonymous abuse.
@@ -108,7 +102,7 @@ app.use('/uploads', express.static(path.resolve(uploadsDir)));
 app.use('/api', contentRouter);
 app.use('/api', chroniclesRouter);
 app.use('/api/auth', subscriberLimiter, subscriberAuthRouter);
-app.use('/api/auth', authLimiter, authRouter);
+app.use('/api/auth', authRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/push', pushRouter);
 app.use('/api/admin', adminRouter);

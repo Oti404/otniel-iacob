@@ -9,6 +9,7 @@
  * POST /refresh re-fetches the user from DB so deleted accounts are rejected immediately.
  */
 import { Router, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { prisma } from '@monorepo/database';
@@ -16,7 +17,21 @@ import { loginSchema } from '@monorepo/shared';
 
 const router = Router();
 
-router.post('/login', async (req: Request, res: Response) => {
+// Split budgets: strict on /login (brute-force defense), looser on /refresh
+// since the frontend interceptor calls it automatically on 401s and shouldn't
+// be able to lock the admin out of logging in.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { message: 'Too many requests, please try again later.' },
+});
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: { message: 'Too many requests, please try again later.' },
+});
+
+router.post('/login', loginLimiter, async (req: Request, res: Response) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: parsed.error?.errors[0]?.message ?? 'Validation error' });
@@ -50,7 +65,7 @@ router.post('/login', async (req: Request, res: Response) => {
   res.json({ data: { accessToken } });
 });
 
-router.post('/refresh', async (req: Request, res: Response) => {
+router.post('/refresh', refreshLimiter, async (req: Request, res: Response) => {
   const token = req.cookies?.refreshToken;
   if (!token) {
     res.status(401).json({ message: 'No refresh token' });
