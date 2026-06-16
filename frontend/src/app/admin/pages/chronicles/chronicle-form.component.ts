@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AdminDataService } from '../../services/admin-data.service';
-import { UploadService } from '../../services/upload.service';
 import { Chronicle } from '@monorepo/shared';
 
 @Component({
@@ -118,7 +117,6 @@ export class ChronicleFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private adminData = inject(AdminDataService);
-  private uploadService = inject(UploadService);
   private cdr = inject(ChangeDetectorRef);
 
   isEdit = false;
@@ -223,7 +221,7 @@ export class ChronicleFormComponent implements OnInit {
     if (!file) return;
     this.uploadingCover = true;
     this.coverError = '';
-    this.uploadService.upload(file).subscribe({
+    this.adminData.uploadChronicleCover(file).subscribe({
       next: (url) => {
         this.form.patchValue({ coverImage: url });
         this.uploadingCover = false;

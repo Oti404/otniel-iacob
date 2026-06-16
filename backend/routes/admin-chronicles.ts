@@ -93,6 +93,21 @@ router.post('/chronicles', async (req: Request, res: Response) => {
   }
 });
 
+// Cover image upload → Cloudinary. Returns the secure URL only (no DB row);
+// the caller stores it in the chronicle's coverImage field via the normal save.
+router.post('/chronicles/upload-cover', upload.single('file'), async (req: Request, res: Response) => {
+  if (!isCloudinaryConfigured()) { res.status(503).json({ message: 'Cloudinary not configured' }); return; }
+  if (!req.file) { res.status(400).json({ message: 'No file provided' }); return; }
+  if (!req.file.mimetype.startsWith('image/')) { res.status(400).json({ message: 'Cover must be an image' }); return; }
+  try {
+    const { url } = await uploadToCloudinary(req.file.buffer, 'covers', 'image');
+    res.json({ data: { url } });
+  } catch (error) {
+    console.error('[POST /admin/chronicles/upload-cover]', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 router.get('/chronicles/:id', async (req: Request, res: Response) => {
   try {
     const chronicle = await prisma.chronicle.findUnique({

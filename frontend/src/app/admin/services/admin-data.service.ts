@@ -92,6 +92,11 @@ export class AdminDataService {
   updateChroniclePublishedAt(id: number, publishedAt: string): Observable<Chronicle> {
     return this.http.put<ApiResponse<Chronicle>>(`/api/admin/chronicles/${id}/published-at`, { publishedAt }).pipe(map((r) => r.data));
   }
+  uploadChronicleCover(file: File): Observable<string> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<ApiResponse<{ url: string }>>('/api/admin/chronicles/upload-cover', form).pipe(map((r) => r.data.url));
+  }
 
   // ─── PASSAGES ────────────────────────────────────────────────────────────────
   createPassage(chronicleId: number, data: { title: string; content?: string | null; order: number }): Observable<Passage> {
