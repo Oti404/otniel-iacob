@@ -44,9 +44,12 @@ export class ChroniclePageComponent implements OnInit {
     });
   }
 
-  private toEmbedUrl(url: string): SafeResourceUrl {
+  private toEmbedUrl(url: string): SafeResourceUrl | undefined {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
     const videoId = match?.[1] ?? '';
+    // Only trust a strictly-shaped 11-char YouTube id — never interpolate raw
+    // input into the embed URL we hand to bypassSecurityTrustResourceUrl.
+    if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return undefined;
     return this.sanitizer.bypassSecurityTrustResourceUrl(
       `https://www.youtube.com/embed/${videoId}`,
     );
