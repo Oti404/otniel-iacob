@@ -71,6 +71,15 @@ const authLimiter = rateLimit({
   message: { message: 'Too many requests, please try again later.' },
 });
 
+// Subscriber-auth (Google OAuth + /subscriber/me polling) is unauthenticated
+// and was previously unthrottled. More generous than the admin limiter since
+// legit subscribers poll /subscriber/me, but still bounds anonymous abuse.
+const subscriberLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { message: 'Too many requests, please try again later.' },
+});
+
 app.get('/api/health', async (_req: Request, res: Response) => {
   let dbStatus = 'disconnected';
   try {
@@ -98,7 +107,7 @@ app.use('/uploads', express.static(path.resolve(uploadsDir)));
 
 app.use('/api', contentRouter);
 app.use('/api', chroniclesRouter);
-app.use('/api/auth', subscriberAuthRouter);
+app.use('/api/auth', subscriberLimiter, subscriberAuthRouter);
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/push', pushRouter);
