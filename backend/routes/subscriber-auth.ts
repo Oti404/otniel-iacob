@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prisma } from '@monorepo/database';
 
 const router = Router();
@@ -19,20 +20,35 @@ router.get('/google', (req: Request, res: Response) => {
     res.status(503).json({ message: 'Google OAuth not configured' });
     return;
   }
+  // CSRF defense: bind this login attempt to a random nonce stored in a
+  // short-lived cookie, then require Google to echo it back in the callback.
+  // sameSite must be 'lax' (not 'strict') so the cookie survives the
+  // top-level redirect back from accounts.google.com.
+  const state = crypto.randomBytes(16).toString('hex');
+  res.cookie('oauth_state', state, {
+    httpOnly: true,
+    secure: req.secure,
+    sameSite: 'lax',
+    maxAge: 10 * 60 * 1000,
+  });
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,
     redirect_uri: process.env.GOOGLE_CALLBACK_URL!,
     response_type: 'code',
     scope: 'openid email profile',
+    state,
   });
   res.redirect(`${GOOGLE_AUTH}?${params}`);
 });
 
 // GET /api/auth/google/callback — exchange code, upsert subscriber, issue cookie
 router.get('/google/callback', async (req: Request, res: Response) => {
-  const { code, error } = req.query as { code?: string; error?: string };
+  const { code, state, error } = req.query as { code?: string; state?: string; error?: string };
 
-  if (error || !code) {
+  // Reject if the state nonce is missing or doesn't match the cookie we set.
+  const expectedState = req.cookies?.oauth_state;
+  res.clearCookie('oauth_state', { httpOnly: true, sameSite: 'lax' });
+  if (error || !code || !state || !expectedState || state !== expectedState) {
     res.redirect(`${frontendUrl()}/#/adventures?auth=error`);
     return;
   }
