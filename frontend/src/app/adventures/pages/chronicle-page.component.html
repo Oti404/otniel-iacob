@@ -9,7 +9,7 @@
   <ng-container *ngIf="!loading() && !error() && chronicle() as chr">
     <header class="chr-header">
       <div class="chr-cover" *ngIf="chr.coverImage">
-        <img [src]="chr.coverImage" [alt]="chr.title">
+        <img [src]="chr.coverImage | cldImg:1280" [alt]="chr.title" fetchpriority="high" decoding="async">
         <div class="cover-overlay"></div>
       </div>
       <div class="chr-meta" [class.chr-meta--no-cover]="!chr.coverImage">
@@ -34,7 +34,7 @@
         <div class="media-gallery" *ngIf="p.media.length > 0">
           <div class="media-item" *ngFor="let m of p.media">
             <ng-container [ngSwitch]="m.type">
-              <img *ngSwitchCase="'IMAGE'" [src]="m.url" [alt]="m.caption || p.title" loading="lazy">
+              <img *ngSwitchCase="'IMAGE'" [src]="m.url | cldImg:900" [alt]="m.caption || p.title" loading="lazy" decoding="async">
               <video *ngSwitchCase="'VIDEO'" controls preload="metadata">
                 <source [src]="m.url">
               </video>

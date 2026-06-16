@@ -34,7 +34,7 @@
       <div class="chronicles-grid" *ngIf="chronicles().length > 0">
         <a class="chronicle-card" *ngFor="let c of chronicles()" [routerLink]="['/adventures', c.id]">
           <div class="card-cover" [class.card-cover--empty]="!c.coverImage">
-            <img *ngIf="c.coverImage" [src]="c.coverImage" [alt]="c.title" loading="lazy">
+            <img *ngIf="c.coverImage" [src]="c.coverImage | cldImg:600" [alt]="c.title" loading="lazy" decoding="async">
             <span *ngIf="!c.coverImage" class="cover-placeholder">{{ c.title[0] }}</span>
           </div>
           <div class="card-body">

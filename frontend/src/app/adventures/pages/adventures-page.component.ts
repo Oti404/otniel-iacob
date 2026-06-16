@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ChroniclesService, ChronicleListItem } from '../../services/chronicles.service';
 import { SubscriberAuthService } from '../../services/subscriber-auth.service';
+import { CloudinaryImagePipe } from '../../shared/cloudinary-image.pipe';
 
 @Component({
   selector: 'app-adventures-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CloudinaryImagePipe],
   templateUrl: './adventures-page.component.html',
   styleUrl: './adventures-page.component.scss',
 })

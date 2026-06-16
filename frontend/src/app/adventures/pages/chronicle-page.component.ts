@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ChroniclesService } from '../../services/chronicles.service';
 import { Chronicle, Passage, PassageMedia } from '@monorepo/shared';
 import { SubscribePanelComponent } from '../components/subscribe-panel.component';
+import { CloudinaryImagePipe } from '../../shared/cloudinary-image.pipe';
 
 type ProcessedMedia = PassageMedia & { embedUrl?: SafeResourceUrl };
 type ProcessedPassage = Omit<Passage, 'media'> & { media: ProcessedMedia[] };
@@ -12,7 +13,7 @@ type ProcessedPassage = Omit<Passage, 'media'> & { media: ProcessedMedia[] };
 @Component({
   selector: 'app-chronicle-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, SubscribePanelComponent],
+  imports: [CommonModule, RouterModule, SubscribePanelComponent, CloudinaryImagePipe],
   templateUrl: './chronicle-page.component.html',
   styleUrl: './chronicle-page.component.scss',
 })
