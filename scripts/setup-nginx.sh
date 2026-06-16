@@ -59,7 +59,7 @@ if [ ! -d "$CERT_DIR" ]; then
   nginx_apply
 
   mkdir -p /var/www/certbot
-  certbot certonly --webroot -w /var/www/certbot -d "$DOMAIN" \
+  certbot certonly --webroot -w /var/www/certbot -d "$DOMAIN" -d "www.$DOMAIN" \
     --non-interactive --agree-tos -m "$EMAIL"
   echo "SSL cert obtained."
 fi
