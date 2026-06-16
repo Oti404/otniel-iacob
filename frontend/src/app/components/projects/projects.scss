@@ -1,3 +1,5 @@
+@use 'sass:list';
+
 /* =========================================
    1. VARIABILE & CONFIGURARE
    ========================================= */
@@ -226,7 +228,7 @@ $chip-colors: ($neon-blue, $neon-pink, $neon-green, $neon-amber, $neon-purple);
 
     @for $i from 1 through 5 {
       &:nth-child(5n + #{$i}) {
-        $c: nth($chip-colors, $i);
+        $c: list.nth($chip-colors, $i);
         color: $c;
         border-color: rgba($c, 0.35);
         background: rgba($c, 0.05);
