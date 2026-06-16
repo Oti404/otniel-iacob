@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AdminDataService } from '../../services/admin-data.service';
+import { UploadService } from '../../services/upload.service';
 import { Chronicle } from '@monorepo/shared';
 
 @Component({
@@ -34,8 +35,17 @@ import { Chronicle } from '@monorepo/shared';
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-label">Cover Image URL</label>
-            <input type="url" formControlName="coverImage" class="admin-input" placeholder="https://...">
+            <label class="admin-label">Cover Image</label>
+            <input type="url" formControlName="coverImage" class="admin-input" placeholder="https://... or upload below">
+            <div class="cover-upload-row">
+              <input #coverInput type="file" accept="image/jpeg,image/png,image/gif,image/webp" hidden
+                (change)="onCoverSelected($event)">
+              <button type="button" class="admin-btn admin-btn-sm" [disabled]="uploadingCover"
+                (click)="coverInput.click()">
+                {{ uploadingCover ? 'Uploading...' : '⬆ Upload from computer' }}
+              </button>
+              <span class="cover-upload-error" *ngIf="coverError">{{ coverError }}</span>
+            </div>
             <div class="cover-preview" *ngIf="form.value.coverImage">
               <img [src]="form.value.coverImage" alt="cover preview" (error)="onImgError($event)">
             </div>
@@ -90,6 +100,8 @@ import { Chronicle } from '@monorepo/shared';
     .pf-actions { display: flex; align-items: center; gap: 16px; padding: 4px 0 8px; }
     .pf-error { color: var(--admin-danger); font-size: 12px; }
     .pf-success { color: var(--admin-neon); font-size: 12px; }
+    .cover-upload-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .cover-upload-error { color: var(--admin-danger); font-size: 12px; }
     .cover-preview {
       margin-top: 8px; border-radius: 4px; overflow: hidden; max-width: 320px;
       border: 1px solid var(--admin-border);
@@ -106,6 +118,7 @@ export class ChronicleFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private adminData = inject(AdminDataService);
+  private uploadService = inject(UploadService);
   private cdr = inject(ChangeDetectorRef);
 
   isEdit = false;
@@ -116,6 +129,8 @@ export class ChronicleFormComponent implements OnInit {
   publishing = false;
   savingDate = false;
   publishedAtDate = '';
+  uploadingCover = false;
+  coverError = '';
   errorMsg = '';
   successMsg = '';
 
@@ -199,6 +214,28 @@ export class ChronicleFormComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => { this.savingDate = false; this.errorMsg = err?.error?.message || 'Date update failed'; this.cdr.detectChanges(); },
+    });
+  }
+
+  onCoverSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.uploadingCover = true;
+    this.coverError = '';
+    this.uploadService.upload(file).subscribe({
+      next: (url) => {
+        this.form.patchValue({ coverImage: url });
+        this.uploadingCover = false;
+        input.value = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.uploadingCover = false;
+        this.coverError = err?.error?.message || 'Upload failed';
+        input.value = '';
+        this.cdr.detectChanges();
+      },
     });
   }
 
