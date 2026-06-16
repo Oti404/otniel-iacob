@@ -76,7 +76,9 @@ router.post('/refresh', refreshLimiter, async (req: Request, res: Response) => {
     const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as unknown as { sub: number };
     const user = await prisma.adminUser.findUnique({ where: { id: payload.sub } });
     if (!user) {
-      res.status(401).json({ message: 'User not found' });
+      // Same message as a bad/expired token — don't reveal whether the
+      // account behind a validly-signed token still exists.
+      res.status(401).json({ message: 'Invalid or expired refresh token' });
       return;
     }
     const accessToken = jwt.sign({ sub: user.id, email: user.email, type: 'admin' }, process.env.JWT_SECRET!, { expiresIn: '15m' });
