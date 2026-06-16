@@ -23,20 +23,24 @@
 
 | ID | Severity | Title | Status |
 |----|----------|-------|--------|
-| C1 | 🔴 CRITICAL | Admin auth bypass — subscriber token replayable as admin | ✅ FIXED (commit `d7ca104`) |
-| H1 | 🟠 HIGH | Dependency vulnerabilities (7 high / 3 moderate) | Open |
-| H2 | 🟠 HIGH | Google OAuth login-CSRF — no `state` parameter | Open |
-| M1 | 🟡 MEDIUM | AI-chat proxy has no rate limit (cost/DoS on n8n) | Open |
-| M2 | 🟡 MEDIUM | Subscriber-auth routes not rate-limited | Open |
-| M3 | 🟡 MEDIUM | SVG uploads allowed (stored XSS if opened directly) | Open |
-| M4 | 🟡 MEDIUM | Shared rate-limit budget for login + refresh | Open |
-| L1 | 🔵 LOW | `/api/health` discloses DB connectivity state | Open |
-| L2 | 🔵 LOW | `subscriptions` DELETE doesn't guard `NaN` id | Open |
-| L3 | 🔵 LOW | YouTube embed via `bypassSecurityTrustResourceUrl` + weak regex | Open |
+| C1 | 🔴 CRITICAL | Admin auth bypass — subscriber token replayable as admin | ✅ FIXED (`d7ca104`) |
+| H1 | 🟠 HIGH | Dependency vulnerabilities (7 high / 3 moderate) | ✅ FIXED (`2c6a935`) |
+| H2 | 🟠 HIGH | Google OAuth login-CSRF — no `state` parameter | ✅ FIXED (`c834e43`) |
+| M1 | 🟡 MEDIUM | AI-chat proxy has no rate limit (cost/DoS on n8n) | ✅ FIXED (`af2d845`) |
+| M2 | 🟡 MEDIUM | Subscriber-auth routes not rate-limited | ✅ FIXED (`62096e7`) |
+| M3 | 🟡 MEDIUM | SVG uploads allowed (stored XSS if opened directly) | ✅ FIXED (`1f676f6`) |
+| M4 | 🟡 MEDIUM | Shared rate-limit budget for login + refresh | ✅ FIXED (`d7ad4c9`) |
+| L1 | 🔵 LOW | `/api/health` discloses DB connectivity state | Open (accepted) |
+| L2 | 🔵 LOW | `subscriptions` DELETE doesn't guard `NaN` id | ✅ FIXED |
+| L3 | 🔵 LOW | YouTube embed via `bypassSecurityTrustResourceUrl` + weak regex | ✅ FIXED |
 | L4 | 🔵 LOW | No Subresource Integrity (SRI) on external CDN CSS | Open |
-| L5 | 🔵 LOW | Subscriber JWT lives 30 days, no rotation/revocation | Open |
-| L6 | 🔵 LOW | Auth error messages differ (`User not found` vs `Invalid token`) | Open |
+| L5 | 🔵 LOW | Subscriber JWT lives 30 days, no rotation/revocation | Open (accepted) |
+| L6 | 🔵 LOW | Auth error messages differ (`User not found` vs `Invalid token`) | ✅ FIXED |
 | I1–I6 | 🟢 INFO | Hardening & process improvements | Open |
+
+> **Update 2026-06-16:** All CRITICAL, HIGH, and MEDIUM findings fixed and deployed,
+> plus lows L2/L3/L6. Remaining open: L4 (SRI), L1/L5 (accepted as low-risk for a
+> single-admin portfolio), and the I1–I6 process improvements.
 
 ---
 
