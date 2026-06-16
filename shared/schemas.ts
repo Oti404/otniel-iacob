@@ -96,6 +96,10 @@ export const passageMediaSchema = z.object({
   caption: z.string().nullable().optional(),
 });
 
+export const publishedAtSchema = z.object({
+  publishedAt: z.coerce.date(),
+});
+
 export const subscriptionSchema = z.object({
   type: z.enum(['GLOBAL', 'CHRONICLE']),
   chronicleId: z.number().int().nullable().optional(),

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AdminDataService } from '../../services/admin-data.service';
 import { Chronicle } from '@monorepo/shared';
@@ -8,7 +8,7 @@ import { Chronicle } from '@monorepo/shared';
 @Component({
   selector: 'app-chronicle-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
   template: `
     <div class="admin-section-header">
       <h2>{{ isEdit ? 'Edit Chronicle' : 'New Chronicle' }}</h2>
@@ -53,6 +53,13 @@ import { Chronicle } from '@monorepo/shared';
               {{ publishing ? 'Publishing...' : 'PUBLISH' }}
             </button>
           </div>
+          <div class="date-edit-row" *ngIf="chronicle.publishedAt">
+            <label class="admin-label" style="margin:0;">Published date</label>
+            <input type="date" class="admin-input" style="max-width:160px;" [(ngModel)]="publishedAtDate" [ngModelOptions]="{standalone: true}">
+            <button type="button" class="admin-btn admin-btn-sm" [disabled]="savingDate" (click)="saveDate()">
+              {{ savingDate ? 'Saving...' : 'Save Date' }}
+            </button>
+          </div>
           <div style="margin-top:10px;" *ngIf="chronicle.id">
             <a [routerLink]="['/admin/chronicles', chronicle.id, 'passages']" class="admin-btn admin-btn-sm">
               Manage Passages →
@@ -91,6 +98,7 @@ import { Chronicle } from '@monorepo/shared';
     .publish-row { display: flex; align-items: center; gap: 16px; }
     .status-text { font-size: 12px; color: var(--admin-text-muted); letter-spacing: 0.5px; }
     .status-text--live { color: var(--admin-neon); }
+    .date-edit-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--admin-border); }
   `],
 })
 export class ChronicleFormComponent implements OnInit {
@@ -106,6 +114,8 @@ export class ChronicleFormComponent implements OnInit {
   loaded = false;
   saving = false;
   publishing = false;
+  savingDate = false;
+  publishedAtDate = '';
   errorMsg = '';
   successMsg = '';
 
@@ -128,6 +138,7 @@ export class ChronicleFormComponent implements OnInit {
             description: data.description ?? '',
             coverImage: data.coverImage ?? '',
           });
+          if (data.publishedAt) this.publishedAtDate = data.publishedAt.slice(0, 10);
           this.loaded = true;
           this.cdr.detectChanges();
         },
@@ -169,8 +180,25 @@ export class ChronicleFormComponent implements OnInit {
     if (!this.id) return;
     this.publishing = true;
     this.adminData.publishChronicle(this.id).subscribe({
-      next: (data) => { this.chronicle = data; this.publishing = false; this.cdr.detectChanges(); },
+      next: (data) => {
+        this.chronicle = data;
+        if (data.publishedAt) this.publishedAtDate = data.publishedAt.slice(0, 10);
+        this.publishing = false; this.cdr.detectChanges();
+      },
       error: (err) => { this.publishing = false; this.errorMsg = err?.error?.message || 'Publish failed'; this.cdr.detectChanges(); },
+    });
+  }
+
+  saveDate() {
+    if (!this.id || !this.publishedAtDate) return;
+    this.savingDate = true;
+    this.adminData.updateChroniclePublishedAt(this.id, this.publishedAtDate).subscribe({
+      next: (data) => {
+        this.chronicle = data; this.savingDate = false; this.successMsg = 'Date updated!';
+        setTimeout(() => { this.successMsg = ''; this.cdr.detectChanges(); }, 2000);
+        this.cdr.detectChanges();
+      },
+      error: (err) => { this.savingDate = false; this.errorMsg = err?.error?.message || 'Date update failed'; this.cdr.detectChanges(); },
     });
   }
 

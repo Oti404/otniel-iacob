@@ -89,6 +89,9 @@ export class AdminDataService {
   publishChronicle(id: number): Observable<Chronicle> {
     return this.http.post<ApiResponse<Chronicle>>(`/api/admin/chronicles/${id}/publish`, {}).pipe(map((r) => r.data));
   }
+  updateChroniclePublishedAt(id: number, publishedAt: string): Observable<Chronicle> {
+    return this.http.put<ApiResponse<Chronicle>>(`/api/admin/chronicles/${id}/published-at`, { publishedAt }).pipe(map((r) => r.data));
+  }
 
   // ─── PASSAGES ────────────────────────────────────────────────────────────────
   createPassage(chronicleId: number, data: { title: string; content?: string | null; order: number }): Observable<Passage> {
@@ -102,6 +105,9 @@ export class AdminDataService {
   }
   publishPassage(pid: number): Observable<Passage> {
     return this.http.post<ApiResponse<Passage>>(`/api/admin/passages/${pid}/publish`, {}).pipe(map((r) => r.data));
+  }
+  updatePassagePublishedAt(pid: number, publishedAt: string): Observable<Passage> {
+    return this.http.put<ApiResponse<Passage>>(`/api/admin/passages/${pid}/published-at`, { publishedAt }).pipe(map((r) => r.data));
   }
 
   // ─── MEDIA ───────────────────────────────────────────────────────────────────

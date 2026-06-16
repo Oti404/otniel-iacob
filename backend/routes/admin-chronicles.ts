@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { prisma } from '@monorepo/database';
 import { authMiddleware } from '../middleware/auth';
-import { chronicleSchema, passageSchema, passageMediaSchema } from '@monorepo/shared';
+import { chronicleSchema, passageSchema, passageMediaSchema, publishedAtSchema } from '@monorepo/shared';
 import {
   isCloudinaryConfigured,
   uploadToCloudinary,
@@ -179,6 +179,26 @@ router.post('/chronicles/:id/publish', async (req: Request, res: Response) => {
   }
 });
 
+// Editing the publish date is only allowed once published — backdating past trips.
+router.put('/chronicles/:id/published-at', async (req: Request, res: Response) => {
+  const parsed = publishedAtSchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ message: zodError(parsed) }); return; }
+  const id = cid(req);
+  try {
+    const existing = await prisma.chronicle.findUnique({ where: { id } });
+    if (!existing) { res.status(404).json({ message: 'Chronicle not found' }); return; }
+    if (!existing.publishedAt) { res.status(400).json({ message: 'Publish it first before editing the date' }); return; }
+    const chronicle = await prisma.chronicle.update({
+      where: { id },
+      data: { publishedAt: parsed.data.publishedAt },
+    });
+    res.json({ data: mapChronicle(chronicle) });
+  } catch (error) {
+    console.error('[PUT /admin/chronicles/:id/published-at]', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // ─── PASSAGES ─────────────────────────────────────────────────────────────────
 
 router.get('/chronicles/:id/passages', async (req: Request, res: Response) => {
@@ -285,6 +305,33 @@ router.post('/passages/:pid/publish', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('[POST /admin/passages/:pid/publish]', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Editing the publish date is only allowed once published — backdating past trips.
+router.put('/passages/:pid/published-at', async (req: Request, res: Response) => {
+  const parsed = publishedAtSchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ message: zodError(parsed) }); return; }
+  const id = pid(req);
+  try {
+    const existing = await prisma.passage.findUnique({ where: { id } });
+    if (!existing) { res.status(404).json({ message: 'Passage not found' }); return; }
+    if (!existing.publishedAt) { res.status(400).json({ message: 'Publish it first before editing the date' }); return; }
+    const passage = await prisma.passage.update({
+      where: { id },
+      data: { publishedAt: parsed.data.publishedAt },
+    });
+    res.json({
+      data: {
+        ...passage,
+        publishedAt: passage.publishedAt!.toISOString(),
+        createdAt: passage.createdAt.toISOString(),
+        updatedAt: passage.updatedAt.toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('[PUT /admin/passages/:pid/published-at]', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

@@ -52,6 +52,13 @@ import { Passage, PassageMedia } from '@monorepo/shared';
               {{ publishing ? 'Publishing...' : 'PUBLISH' }}
             </button>
           </div>
+          <div class="date-edit-row" *ngIf="passage.publishedAt">
+            <label class="admin-label" style="margin:0;">Published date</label>
+            <input type="date" class="admin-input" style="max-width:160px;" [(ngModel)]="publishedAtDate" [ngModelOptions]="{standalone: true}">
+            <button type="button" class="admin-btn admin-btn-sm" [disabled]="savingDate" (click)="saveDate()">
+              {{ savingDate ? 'Saving...' : 'Save Date' }}
+            </button>
+          </div>
         </div>
 
         <div class="pf-actions">
@@ -154,6 +161,7 @@ import { Passage, PassageMedia } from '@monorepo/shared';
     .publish-row { display: flex; align-items: center; gap: 16px; }
     .status-text { font-size: 12px; color: var(--admin-text-muted); letter-spacing: 0.5px; }
     .status-text--live { color: var(--admin-neon); }
+    .date-edit-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--admin-border); }
 
     .media-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
     .media-row {
@@ -199,6 +207,8 @@ export class PassageFormComponent implements OnInit {
 
   saving = false;
   publishing = false;
+  savingDate = false;
+  publishedAtDate = '';
   errorMsg = '';
   successMsg = '';
   toast = '';
@@ -240,6 +250,7 @@ export class PassageFormComponent implements OnInit {
           this.passage = p;
           this.media = [...p.media].sort((a, b) => a.order - b.order);
           this.form.patchValue({ title: p.title, content: p.content ?? '', order: p.order });
+          if (p.publishedAt) this.publishedAtDate = p.publishedAt.slice(0, 10);
         }
         this.loaded = true;
         this.cdr.detectChanges();
@@ -276,8 +287,25 @@ export class PassageFormComponent implements OnInit {
     if (!this.passageId) return;
     this.publishing = true;
     this.adminData.publishPassage(this.passageId).subscribe({
-      next: (data) => { this.passage = { ...this.passage!, publishedAt: data.publishedAt }; this.publishing = false; this.cdr.detectChanges(); },
+      next: (data) => {
+        this.passage = { ...this.passage!, publishedAt: data.publishedAt };
+        if (data.publishedAt) this.publishedAtDate = data.publishedAt.slice(0, 10);
+        this.publishing = false; this.cdr.detectChanges();
+      },
       error: (err) => { this.publishing = false; this.errorMsg = err?.error?.message || 'Publish failed'; this.cdr.detectChanges(); },
+    });
+  }
+
+  saveDate() {
+    if (!this.passageId || !this.publishedAtDate) return;
+    this.savingDate = true;
+    this.adminData.updatePassagePublishedAt(this.passageId, this.publishedAtDate).subscribe({
+      next: (data) => {
+        this.passage = { ...this.passage!, publishedAt: data.publishedAt }; this.savingDate = false; this.successMsg = 'Date updated!';
+        setTimeout(() => { this.successMsg = ''; this.cdr.detectChanges(); }, 2000);
+        this.cdr.detectChanges();
+      },
+      error: (err) => { this.savingDate = false; this.errorMsg = err?.error?.message || 'Date update failed'; this.cdr.detectChanges(); },
     });
   }
 
