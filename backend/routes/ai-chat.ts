@@ -6,11 +6,21 @@
  * both formats are handled to accommodate different n8n node configurations.
  */
 import { Router, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { authMiddleware } from '../middleware/auth';
 import { z } from 'zod';
 
 const router = Router();
 router.use(authMiddleware);
+
+// Each call proxies to the paid LLM via n8n — cap it so a stolen 15-min
+// admin token (or a runaway client) can't rack up cost / DoS the workflow.
+const chatLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  message: { message: 'Too many messages, please slow down.' },
+});
+router.use(chatLimiter);
 
 const chatSchema = z.object({
   message: z.string().min(1).max(5000),
