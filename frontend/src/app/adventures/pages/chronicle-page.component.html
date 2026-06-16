@@ -36,17 +36,22 @@
             <div class="carousel-track" [style.transform]="'translateX(-' + (p.currentSlide * 100) + '%)'">
               <div class="carousel-slide" *ngFor="let m of p.media">
                 <ng-container [ngSwitch]="m.type">
-                  <img *ngSwitchCase="'IMAGE'" [src]="m.url | cldImg:1280" [alt]="m.caption || p.title" loading="lazy" decoding="async">
-                  <video *ngSwitchCase="'VIDEO'" controls preload="metadata">
-                    <source [src]="m.url">
-                  </video>
-                  <iframe
-                    *ngSwitchCase="'YOUTUBE'"
-                    [src]="m.embedUrl"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                  </iframe>
+                  <div *ngSwitchCase="'IMAGE'" class="slide-frame" [style.--slide-bg]="'url(' + (m.url | cldImg:160) + ')'">
+                    <img [src]="m.url | cldImg:1280" [alt]="m.caption || p.title" loading="lazy" decoding="async">
+                  </div>
+                  <div *ngSwitchCase="'VIDEO'" class="slide-frame slide-frame--dark">
+                    <video controls preload="metadata">
+                      <source [src]="m.url">
+                    </video>
+                  </div>
+                  <div *ngSwitchCase="'YOUTUBE'" class="slide-frame slide-frame--dark">
+                    <iframe
+                      [src]="m.embedUrl"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen>
+                    </iframe>
+                  </div>
                 </ng-container>
                 <p class="media-caption" *ngIf="m.caption">{{ m.caption }}</p>
               </div>
