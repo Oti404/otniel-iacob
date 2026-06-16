@@ -8,7 +8,7 @@ import { SubscribePanelComponent } from '../components/subscribe-panel.component
 import { CloudinaryImagePipe } from '../../shared/cloudinary-image.pipe';
 
 type ProcessedMedia = PassageMedia & { embedUrl?: SafeResourceUrl };
-type ProcessedPassage = Omit<Passage, 'media'> & { media: ProcessedMedia[] };
+type ProcessedPassage = Omit<Passage, 'media'> & { media: ProcessedMedia[]; currentSlide: number };
 
 @Component({
   selector: 'app-chronicle-page',
@@ -34,6 +34,7 @@ export class ChroniclePageComponent implements OnInit {
         this.chronicle.set(data);
         this.passages.set((data.passages ?? []).map((p) => ({
           ...p,
+          currentSlide: 0,
           media: p.media.map((m) => ({
             ...m,
             embedUrl: m.type === 'YOUTUBE' ? this.toEmbedUrl(m.url) : undefined,
@@ -43,6 +44,18 @@ export class ChroniclePageComponent implements OnInit {
       },
       error: () => { this.error.set('Chronicle not found'); this.loading.set(false); },
     });
+  }
+
+  nextSlide(p: ProcessedPassage) {
+    p.currentSlide = (p.currentSlide + 1) % p.media.length;
+  }
+
+  prevSlide(p: ProcessedPassage) {
+    p.currentSlide = (p.currentSlide - 1 + p.media.length) % p.media.length;
+  }
+
+  goToSlide(p: ProcessedPassage, index: number) {
+    p.currentSlide = index;
   }
 
   private toEmbedUrl(url: string): SafeResourceUrl | undefined {

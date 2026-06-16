@@ -31,22 +31,39 @@
 
         <div class="passage-content" *ngIf="p.content">{{ p.content }}</div>
 
-        <div class="media-gallery" *ngIf="p.media.length > 0">
-          <div class="media-item" *ngFor="let m of p.media">
-            <ng-container [ngSwitch]="m.type">
-              <img *ngSwitchCase="'IMAGE'" [src]="m.url | cldImg:900" [alt]="m.caption || p.title" loading="lazy" decoding="async">
-              <video *ngSwitchCase="'VIDEO'" controls preload="metadata">
-                <source [src]="m.url">
-              </video>
-              <iframe
-                *ngSwitchCase="'YOUTUBE'"
-                [src]="m.embedUrl"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-              </iframe>
-            </ng-container>
-            <p class="media-caption" *ngIf="m.caption">{{ m.caption }}</p>
+        <div class="media-carousel" *ngIf="p.media.length > 0">
+          <div class="carousel-viewport">
+            <div class="carousel-track" [style.transform]="'translateX(-' + (p.currentSlide * 100) + '%)'">
+              <div class="carousel-slide" *ngFor="let m of p.media">
+                <ng-container [ngSwitch]="m.type">
+                  <img *ngSwitchCase="'IMAGE'" [src]="m.url | cldImg:1280" [alt]="m.caption || p.title" loading="lazy" decoding="async">
+                  <video *ngSwitchCase="'VIDEO'" controls preload="metadata">
+                    <source [src]="m.url">
+                  </video>
+                  <iframe
+                    *ngSwitchCase="'YOUTUBE'"
+                    [src]="m.embedUrl"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                  </iframe>
+                </ng-container>
+                <p class="media-caption" *ngIf="m.caption">{{ m.caption }}</p>
+              </div>
+            </div>
+
+            <button type="button" class="carousel-nav carousel-nav--prev" *ngIf="p.media.length > 1"
+              (click)="prevSlide(p)" aria-label="Previous">‹</button>
+            <button type="button" class="carousel-nav carousel-nav--next" *ngIf="p.media.length > 1"
+              (click)="nextSlide(p)" aria-label="Next">›</button>
+
+            <span class="carousel-counter" *ngIf="p.media.length > 1">{{ p.currentSlide + 1 }} / {{ p.media.length }}</span>
+          </div>
+
+          <div class="carousel-dots" *ngIf="p.media.length > 1">
+            <button type="button" class="carousel-dot" *ngFor="let m of p.media; let idx = index"
+              [class.carousel-dot--active]="idx === p.currentSlide"
+              (click)="goToSlide(p, idx)" [attr.aria-label]="'Go to slide ' + (idx + 1)"></button>
           </div>
         </div>
 
