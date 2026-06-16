@@ -84,6 +84,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 
   const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    res.status(400).json({ message: 'Invalid subscription ID' });
+    return;
+  }
 
   const sub = await prisma.subscription.findFirst({
     where: { id, subscriberId: subscriber.id },
