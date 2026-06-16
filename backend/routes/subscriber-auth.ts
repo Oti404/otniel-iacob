@@ -86,7 +86,7 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     const isProd = process.env.NODE_ENV === 'production';
     res.cookie('subscriber_token', token, {
       httpOnly: true,
-      secure: isProd,
+      secure: req.secure,
       sameSite: 'strict',
       maxAge: 30 * 24 * 60 * 60 * 1000,
       // In dev, set domain to 'localhost' so the cookie is shared across all ports

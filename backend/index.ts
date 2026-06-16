@@ -46,6 +46,10 @@ for (const key of required) {
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Trust nginx (first hop) so req.secure reflects the real X-Forwarded-Proto,
+// not just whether Express itself is terminating TLS.
+app.set('trust proxy', 1);
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : ['http://localhost:4200', 'http://localhost:80'];
