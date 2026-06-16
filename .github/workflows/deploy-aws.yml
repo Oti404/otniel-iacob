@@ -59,6 +59,7 @@ jobs:
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+          JWT_SUBSCRIBER_SECRET=${{ secrets.JWT_SUBSCRIBER_SECRET }}
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
           ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
           INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}

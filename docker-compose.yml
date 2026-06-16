@@ -37,6 +37,7 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@postgres:5432/${POSTGRES_DB:-monorepodb}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_SUBSCRIBER_SECRET=${JWT_SUBSCRIBER_SECRET}
       - FRONTEND_URL=http://localhost
     env_file:
       - .env

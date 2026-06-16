@@ -46,6 +46,7 @@ npx prisma db seed         # seed admin user + content
 | `DATABASE_URL` | PostgreSQL connection string |
 | `JWT_SECRET` | Min 16 chars — crashes on startup if missing |
 | `JWT_REFRESH_SECRET` | Min 16 chars — crashes on startup if missing |
+| `JWT_SUBSCRIBER_SECRET` | Min 16 chars, must differ from `JWT_SECRET` — crashes on startup otherwise |
 | `INTERNAL_API_KEY` | Min 16 chars — crashes on startup if missing |
 | `ADMIN_PASSWORD` | Used by seed script |
 | `ALLOWED_ORIGINS` | Comma-separated, e.g. `http://localhost:4200` |

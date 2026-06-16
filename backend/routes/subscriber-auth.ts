@@ -78,8 +78,8 @@ router.get('/google/callback', async (req: Request, res: Response) => {
     });
 
     const token = jwt.sign(
-      { sub: subscriber.googleId, email: subscriber.email },
-      process.env.JWT_SECRET!,
+      { sub: subscriber.googleId, email: subscriber.email, type: 'subscriber' },
+      process.env.JWT_SUBSCRIBER_SECRET!,
       { expiresIn: '30d' },
     );
 
@@ -108,7 +108,11 @@ router.get('/subscriber/me', async (req: Request, res: Response) => {
     return;
   }
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { sub: string; email: string };
+    const payload = jwt.verify(token, process.env.JWT_SUBSCRIBER_SECRET!) as { sub: string; email: string; type: string };
+    if (payload.type !== 'subscriber') {
+      res.status(401).json({ message: 'Invalid token' });
+      return;
+    }
     const subscriber = await prisma.googleSubscriber.findUnique({ where: { googleId: payload.sub } });
     if (!subscriber) {
       res.clearCookie('subscriber_token', { httpOnly: true, sameSite: 'strict' });

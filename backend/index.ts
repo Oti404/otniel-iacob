@@ -1,8 +1,11 @@
 /**
  * Backend entry point.
  *
- * Startup: crashes immediately if JWT_SECRET, JWT_REFRESH_SECRET, or INTERNAL_API_KEY
- * are missing or shorter than 16 chars — misconfigured deploys fail fast rather than silently.
+ * Startup: crashes immediately if JWT_SECRET, JWT_REFRESH_SECRET, JWT_SUBSCRIBER_SECRET, or
+ * INTERNAL_API_KEY are missing or shorter than 16 chars — misconfigured deploys fail fast
+ * rather than silently. JWT_SUBSCRIBER_SECRET must differ from JWT_SECRET: subscriber
+ * (Google OAuth) tokens and admin tokens are deliberately signed with different secrets so
+ * one can never be replayed as the other.
  *
  * Route layout:
  *   GET  /api/health          — DB connectivity probe
@@ -36,11 +39,14 @@ import subscriptionsRouter from './routes/subscriptions';
 import pushRouter from './routes/push';
 
 // ─── Startup validation ───────────────────────────────────────────────────────
-const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'INTERNAL_API_KEY'];
+const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'JWT_SUBSCRIBER_SECRET', 'INTERNAL_API_KEY'];
 for (const key of required) {
   if (!process.env[key] || process.env[key]!.length < 16) {
     throw new Error(`Missing or too short env var: ${key} (min 16 chars)`);
   }
+}
+if (process.env.JWT_SECRET === process.env.JWT_SUBSCRIBER_SECRET) {
+  throw new Error('JWT_SUBSCRIBER_SECRET must differ from JWT_SECRET — a subscriber token would be valid as an admin token otherwise.');
 }
 
 const app = express();

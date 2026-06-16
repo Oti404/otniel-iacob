@@ -37,7 +37,7 @@ router.post('/login', async (req: Request, res: Response) => {
     return;
   }
 
-  const accessToken = jwt.sign({ sub: user.id, email: user.email }, process.env.JWT_SECRET!, { expiresIn: '15m' });
+  const accessToken = jwt.sign({ sub: user.id, email: user.email, type: 'admin' }, process.env.JWT_SECRET!, { expiresIn: '15m' });
   const refreshToken = jwt.sign({ sub: user.id }, process.env.JWT_REFRESH_SECRET!, { expiresIn: '7d' });
 
   res.cookie('refreshToken', refreshToken, {
@@ -64,7 +64,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
       res.status(401).json({ message: 'User not found' });
       return;
     }
-    const accessToken = jwt.sign({ sub: user.id, email: user.email }, process.env.JWT_SECRET!, { expiresIn: '15m' });
+    const accessToken = jwt.sign({ sub: user.id, email: user.email, type: 'admin' }, process.env.JWT_SECRET!, { expiresIn: '15m' });
     res.json({ data: { accessToken } });
   } catch {
     res.status(401).json({ message: 'Invalid or expired refresh token' });
