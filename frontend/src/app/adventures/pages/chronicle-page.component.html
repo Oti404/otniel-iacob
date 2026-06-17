@@ -8,7 +8,7 @@
 
   <ng-container *ngIf="!loading() && !error() && chronicle() as chr">
     <header class="chr-header">
-      <div class="chr-cover" *ngIf="chr.coverImage">
+      <div class="chr-cover" *ngIf="chr.coverImage" [style.--cover-bg]="'url(' + (chr.coverImage | cldImg:200) + ')'">
         <img [src]="chr.coverImage | cldImg:1280" [alt]="chr.title" fetchpriority="high" decoding="async">
         <div class="cover-overlay"></div>
       </div>
