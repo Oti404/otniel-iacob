@@ -32,7 +32,7 @@
         <div class="passage-content" *ngIf="p.content">{{ p.content }}</div>
 
         <div class="media-carousel" *ngIf="p.media.length > 0">
-          <div class="carousel-viewport">
+          <div class="carousel-viewport" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event, p)">
             <div class="carousel-track" [style.transform]="'translateX(-' + (p.currentSlide * 100) + '%)'">
               <div class="carousel-slide" *ngFor="let m of p.media">
                 <ng-container [ngSwitch]="m.type">

@@ -70,10 +70,37 @@
     background: linear-gradient(to bottom, transparent 72%, rgba(0, 0, 0, 0.6) 100%);
   }
 
+  // ─── Mobile: neon polaroid + discrete parallax ─────────────────────────────
   @media (max-width: 600px) {
-    height: clamp(300px, 58vh, 540px);
-    img { max-width: 90%; max-height: 82%; }
+    height: clamp(330px, 64vh, 580px);
+
+    // The photo as a tilted instant-photo with a neon frame.
+    img {
+      max-width: 80%;
+      max-height: 74%;
+      border-radius: 2px;
+      border: 10px solid #0d0d14;
+      border-bottom-width: 40px;
+      box-shadow:
+        0 0 0 1px rgba(0, 243, 255, 0.5),
+        0 0 22px rgba(0, 243, 255, 0.35),
+        0 18px 38px rgba(0, 0, 0, 0.7);
+      transform: rotate(-2deg);
+    }
+
+    // Discrete parallax: the blurred backdrop drifts as the cover scrolls
+    // through the viewport. CSS-only (scroll-driven) — degrades to static.
+    &::before {
+      animation: cover-parallax linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
   }
+}
+
+@keyframes cover-parallax {
+  from { transform: scale(1.3) translateY(-6%); }
+  to   { transform: scale(1.3) translateY(6%); }
 }
 
 .chr-meta {
@@ -179,6 +206,8 @@
   border-radius: 6px;
   border: 1px solid var(--border-dim);
   background: var(--bg-card);
+  // Let vertical page scroll pass through while we handle horizontal swipes.
+  touch-action: pan-y;
 }
 
 .carousel-track {
@@ -310,6 +339,22 @@
   padding: 8px 12px;
   margin: 0;
   font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .slide-frame { height: clamp(240px, 48vh, 460px); }
+
+  // Bigger, always-visible tap targets on touch screens.
+  .carousel-nav {
+    width: 38px;
+    height: 38px;
+    font-size: 1.4rem;
+    background: rgba(10, 10, 15, 0.78);
+    &--prev { left: 8px; }
+    &--next { right: 8px; }
+  }
+
+  .carousel-dot { width: 9px; height: 9px; }
 }
 
 .passage-divider {

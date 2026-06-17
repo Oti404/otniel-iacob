@@ -58,6 +58,25 @@ export class ChroniclePageComponent implements OnInit {
     p.currentSlide = index;
   }
 
+  // ─── Touch / swipe (mobile) ──────────────────────────────────────────────────
+  private touchStartX = 0;
+  private touchStartY = 0;
+
+  onTouchStart(e: TouchEvent) {
+    this.touchStartX = e.changedTouches[0].clientX;
+    this.touchStartY = e.changedTouches[0].clientY;
+  }
+
+  onTouchEnd(e: TouchEvent, p: ProcessedPassage) {
+    if (p.media.length < 2) return;
+    const dx = e.changedTouches[0].clientX - this.touchStartX;
+    const dy = e.changedTouches[0].clientY - this.touchStartY;
+    // Only act on a deliberate mostly-horizontal swipe, so vertical scroll
+    // through the page isn't hijacked.
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) this.nextSlide(p); else this.prevSlide(p);
+  }
+
   private toEmbedUrl(url: string): SafeResourceUrl | undefined {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
     const videoId = match?.[1] ?? '';
