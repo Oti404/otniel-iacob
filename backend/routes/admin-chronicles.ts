@@ -44,6 +44,13 @@ function mid(req: Request): number {
   return n;
 }
 
+// A picked date is a pure calendar day. z.coerce.date() parses "2025-06-15"
+// as UTC midnight, which displays as the previous day in any timezone behind
+// UTC. Anchor it to NOON UTC so the calendar date is stable in any zone (±12h).
+function toNoonUtc(d: Date): Date {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12, 0, 0));
+}
+
 function mapChronicle(c: { id: number; title: string; description: string | null; coverImage: string | null; publishedAt: Date | null; createdAt: Date; updatedAt: Date }) {
   return {
     id: c.id,
@@ -205,7 +212,7 @@ router.put('/chronicles/:id/published-at', async (req: Request, res: Response) =
     if (!existing.publishedAt) { res.status(400).json({ message: 'Publish it first before editing the date' }); return; }
     const chronicle = await prisma.chronicle.update({
       where: { id },
-      data: { publishedAt: parsed.data.publishedAt },
+      data: { publishedAt: toNoonUtc(parsed.data.publishedAt) },
     });
     res.json({ data: mapChronicle(chronicle) });
   } catch (error) {
@@ -335,7 +342,7 @@ router.put('/passages/:pid/published-at', async (req: Request, res: Response) =>
     if (!existing.publishedAt) { res.status(400).json({ message: 'Publish it first before editing the date' }); return; }
     const passage = await prisma.passage.update({
       where: { id },
-      data: { publishedAt: parsed.data.publishedAt },
+      data: { publishedAt: toNoonUtc(parsed.data.publishedAt) },
     });
     res.json({
       data: {

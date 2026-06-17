@@ -41,7 +41,7 @@ router.get('/chronicles/:id', async (req: Request, res: Response) => {
       include: {
         passages: {
           where: { publishedAt: { not: null } },
-          orderBy: { order: 'asc' },
+          orderBy: { publishedAt: 'desc' },
           include: { media: { orderBy: { order: 'asc' } } },
         },
       },
