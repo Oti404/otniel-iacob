@@ -217,8 +217,13 @@
 }
 
 .carousel-slide {
-  min-width: 100%;
-  flex-shrink: 0;
+  // Pin every slide to exactly the viewport width regardless of image size,
+  // otherwise a wide landscape photo makes its slide grow and overflow,
+  // covering the neighbouring slides.
+  flex: 0 0 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 // Each slide shows the whole image (no cropping) centered over a blurred
@@ -251,6 +256,8 @@
   video {
     position: relative;
     z-index: 1;
+    min-width: 0;
+    min-height: 0;
     max-width: 100%;
     max-height: 100%;
     width: auto;
