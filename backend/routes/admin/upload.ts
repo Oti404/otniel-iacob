@@ -1,5 +1,5 @@
 /**
- * File upload — JWT required, rate-limited to 30 uploads / hour.
+ * File upload — JWT required (gate in ./index.ts), rate-limited to 30 uploads / hour.
  *
  * Both MIME type AND file extension are checked together.
  * Checking only one is insufficient: browsers/clients can lie about MIME,
@@ -13,7 +13,6 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import rateLimit from 'express-rate-limit';
-import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
@@ -60,7 +59,7 @@ const uploadLimiter = rateLimit({
   message: { message: 'Too many uploads, please try again later.' },
 });
 
-router.post('/', authMiddleware, uploadLimiter, upload.single('file'), (req: Request, res: Response) => {
+router.post('/', uploadLimiter, upload.single('file'), (req: Request, res: Response) => {
   if (!req.file) {
     res.status(400).json({ message: 'No file uploaded.' });
     return;
