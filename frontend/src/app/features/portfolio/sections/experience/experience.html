@@ -1,0 +1,29 @@
+<div class="section container">
+  <h2 class="section-title"><span class="kicker">03</span>mission.logs<span class="cursor">_</span></h2>
+
+  <ol class="timeline">
+    @for (job of experiences(); track job.id) {
+      <li class="entry" [attr.data-type]="job.type">
+        <span class="marker" aria-hidden="true"></span>
+        <div class="entry-body">
+          <header class="entry-head">
+            <h3>{{ job.role }} <span class="company">&#64; {{ job.company }}</span></h3>
+            <span class="period">{{ period(job) }}</span>
+          </header>
+
+          <ul class="points">
+            @for (point of job.description; track $index) {
+              <li>{{ point }}</li>
+            }
+          </ul>
+
+          <div class="chip-row">
+            @for (t of splitTech(job.tech); track t) {
+              <span class="chip">{{ t }}</span>
+            }
+          </div>
+        </div>
+      </li>
+    }
+  </ol>
+</div>

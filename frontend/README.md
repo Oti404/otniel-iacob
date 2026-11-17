@@ -5,31 +5,28 @@ Angular 21 SPA. Public portfolio at `/`, admin panel at `/admin` (lazy-loaded).
 ## Stack
 - Angular 21, standalone components, TypeScript
 - RxJS, Angular Router (hash location), HttpClient
-- SCSS, cyberpunk design (`#0a0a0f` bg, `#00ffcc` accent, `#ff00aa` secondary)
+- SCSS with design tokens in `src/styles/_tokens.scss` (`#0a0a0f` bg, `#00ffcc` accent, `#ff00aa` secondary); JetBrains Mono + Orbitron, self-hosted
 - Shared types + validators (via `@monorepo/shared`)
 
 ## Structure
 ```
 src/app/
-  app.ts                Root component (health check on init, RouterOutlet)
+  app.ts                Root component (subscriber session, RouterOutlet)
   app.config.ts         Providers: router + HttpClient + authInterceptor
-  app.routes.ts         / → Portfolio; /admin → lazy admin; ** → /
+  app.routes.ts         / → Portfolio; /adventures, /admin → lazy; ** → /
 
-  components/           Public portfolio sections
-    portfolio/          Shell — assembles all sections
-    navbar/             Top nav
-    home/               Hero section
-    projects/           Projects grid
-    experience/         Experience timeline
-    about/              About section
-    hobbies/            Hobbies grid
-    academic-journey/   Semesters + subjects viewer
-    footer/             Footer
+  core/services/        Public API services (content, chronicles, subscriber auth, subscriptions, push)
+  shared/
+    pipes/              cloudinary-image.pipe (cldImg)
+    ui/                 icon.component (inline SVG icons)
 
-  services/
-    content.service.ts  HTTP wrappers for all public API calls
+  features/portfolio/   Public page
+    portfolio.component Shell — navbar, sections, footer
+    sections/           navbar, home, about, projects, experience, footer (+ hobbies, academic-journey: not rendered)
 
-  admin/                Lazy-loaded admin module
+  features/adventures/  Lazy — chronicle list + chronicle page, carousel, subscribe panel
+
+  features/admin/       Lazy-loaded admin module
     admin.routes.ts     Routes (all behind authGuard except /login)
     guards/
       auth.guard.ts     Blocks /admin/* if no in-memory token
@@ -47,7 +44,6 @@ src/app/
       experience/       List + form
       hobbies/          List + form
       semesters/        Semesters + subjects manager
-      ai-assistant/     Chat UI → /api/admin/ai-chat
 ```
 
 ## Dev

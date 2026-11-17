@@ -2,17 +2,13 @@
   "name": "portofoliu-personal",
   "version": "0.0.0",
   "scripts": {
-  "ng": "ng",
-  "start": "ng serve",
-  "build": "ng build",
-  "watch": "ng build --watch --configuration development",
-  "test": "ng test",
-
-  "// --- COMENZI DEPLOY ---": "",
-  "predeploy": "ng build --base-href / && echo otniel-iacob.website > dist/portofoliu-personal/browser/CNAME",
-  "deploy-gh": "npx gh-pages -d dist/portofoliu-personal/browser",
-  "full-deploy": "npm run predeploy && npm run deploy-gh"
-},
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "// --- COMENZI DEPLOY ---": ""
+  },
   "prettier": {
     "printWidth": 100,
     "singleQuote": true,
@@ -35,9 +31,11 @@
     "@angular/forms": "^21.2.17",
     "@angular/platform-browser": "^21.2.17",
     "@angular/router": "^21.2.17",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource/orbitron": "^5.3.0",
+    "@monorepo/shared": "*",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "@monorepo/shared": "*"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/build": "^21.2.15",

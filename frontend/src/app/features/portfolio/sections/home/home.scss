@@ -1,0 +1,197 @@
+@use 'tokens' as *;
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  gap: var(--s-7);
+  min-height: min(100svh, 960px);
+  padding-top: calc(var(--nav-h) + var(--s-6));
+  padding-bottom: var(--s-7);
+
+  @include below(md) {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: var(--s-5);
+    min-height: auto;
+  }
+}
+
+// ─── Text ────────────────────────────────────────────────────────────────────
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+
+  @include below(md) {
+    align-items: center;
+    order: 2;
+  }
+}
+
+.role {
+  font-size: var(--fs-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+
+  .prompt {
+    color: var(--accent-2);
+  }
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.name {
+  font-size: var(--fs-lg);
+  color: var(--text-muted);
+}
+
+.quote {
+  margin: var(--s-2) 0 0;
+  padding-left: var(--s-4);
+  border-left: 2px solid var(--accent-2);
+  max-width: 52ch;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+
+  cite {
+    display: block;
+    margin-top: var(--s-1);
+    font-style: normal;
+    color: var(--accent-2);
+  }
+
+  @include below(md) {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+
+  @include below(md) {
+    justify-content: center;
+  }
+}
+
+// ─── Visual ──────────────────────────────────────────────────────────────────
+.hero-visual {
+  --r1: 190px;
+  --r2: 255px;
+  position: relative;
+  width: calc(var(--r2) * 2 + 40px);
+  aspect-ratio: 1;
+  justify-self: center;
+
+  @include below(lg) {
+    --r1: 150px;
+    --r2: 205px;
+  }
+
+  @include below(sm) {
+    --r1: 112px;
+    --r2: 150px;
+    width: calc(var(--r2) * 2 + 24px);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 25%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--accent-rgb), 0.18), transparent 70%);
+    filter: blur(40px);
+  }
+}
+
+.ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  translate: -50% -50%;
+
+  &--1 {
+    width: calc(var(--r1) * 2);
+    aspect-ratio: 1;
+    border-top-color: rgba(var(--accent-rgb), 0.7);
+    animation: spin 18s linear infinite;
+  }
+
+  &--2 {
+    width: calc(var(--r2) * 2);
+    aspect-ratio: 1;
+    border-bottom-color: rgba(var(--accent-2-rgb), 0.6);
+    animation: spin 28s linear infinite reverse;
+  }
+}
+
+// Labels sit on the rings at a fixed angle, so they stay readable.
+.orbiter {
+  --r: var(--r1);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: rotate(var(--angle)) translateX(var(--r)) rotate(calc(var(--angle) * -1));
+
+  &--outer {
+    --r: var(--r2);
+  }
+}
+
+.orbiter-label {
+  display: inline-block;
+  translate: -50% -50%;
+  padding: 2px var(--s-2);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  color: var(--text);
+  white-space: nowrap;
+  animation: float 5s var(--ease) infinite alternate;
+
+  .orbiter--outer & {
+    color: var(--text-muted);
+    animation-delay: -2.5s;
+  }
+}
+
+.core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--r1) * 1.5);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    // The artwork is a circle on a dark square; clip the square corners.
+    clip-path: circle(47%);
+    filter: drop-shadow(0 0 24px rgba(var(--accent-rgb), 0.35));
+  }
+}
+
+@keyframes spin {
+  to { rotate: 360deg; }
+}
+
+@keyframes float {
+  to { transform: translateY(-6px); }
+}

@@ -1,0 +1,40 @@
+<div class="section container">
+  <h2 class="section-title"><span class="kicker">01</span>whoami<span class="cursor">_</span></h2>
+
+  @if (profile(); as p) {
+    <div class="about">
+      <div class="photo">
+        <img [src]="p.photo" [alt]="p.name" width="220" height="220" loading="lazy" />
+      </div>
+
+      <div class="body">
+        <p class="intro">{{ p.description }}</p>
+
+        <ul class="details">
+          @for (d of details(); track d.label) {
+            <li>
+              @if (d.href) {
+                <a class="detail detail--link" [href]="d.href"
+                   [attr.target]="d.external ? '_blank' : null"
+                   [attr.rel]="d.external ? 'noopener' : null">
+                  <app-icon [name]="d.icon" class="detail-icon" />
+                  <span class="detail-label">{{ d.label }}</span>
+                  <span class="detail-value">{{ d.value }}</span>
+                  @if (d.external) {
+                    <app-icon name="external" [size]="14" class="detail-arrow" />
+                  }
+                </a>
+              } @else {
+                <div class="detail">
+                  <app-icon [name]="d.icon" class="detail-icon" />
+                  <span class="detail-label">{{ d.label }}</span>
+                  <span class="detail-value">{{ d.value }}</span>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  }
+</div>

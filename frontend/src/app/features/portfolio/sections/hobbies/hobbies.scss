@@ -1,0 +1,117 @@
+/* --- VARIABILE SI CONFIGURARE --- */
+
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: var(--font-mono);
+  text-align: center;
+  background: var(--bg);
+}
+
+.hobbies-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  padding: 20px 0;
+}
+/* --- HOBBY CARD UPDATED: TEXT BELOW IMAGE --- */
+
+.hobby-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid rgba(var(--accent-rgb), 0.1);
+  border-radius: 20px;
+  padding: 35px 25px; // Balanced padding
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+
+  /* --- ICON CONTAINER (NOW SITS ON TOP) --- */
+  .icon-container {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 20px; // Positive margin to push text down
+    border-radius: 50%;
+    border: 2px solid rgba(var(--accent-rgb), 0.15);
+    background: var(--bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    overflow: hidden;
+    transition: all 0.5s ease;
+
+    .hobby-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.05); // Keeps those square edges hidden
+      filter: brightness(1.1) contrast(1.1);
+      transition: transform 0.5s ease;
+    }
+  }
+
+  /* --- TEXTUL TITLU (BELOW THE IMAGE) --- */
+  .text {
+    position: relative;
+    z-index: 2;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: rgba(5, 10, 16, 0.8);
+    padding: 8px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(var(--accent-rgb), 0.1);
+    margin-bottom: 0; // Reset
+  }
+
+  /* --- DESCRIEREA (APPEARS ON HOVER) --- */
+  .description {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+    opacity: 0;
+    max-height: 0;
+    transition: all 0.4s ease;
+    text-align: center;
+  }
+
+  /* --- HOVER EFFECTS --- */
+  &:hover {
+    transform: translateY(-10px);
+    border-color: rgba(var(--accent-rgb), 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    .icon-container {
+      border-color: var(--accent);
+      box-shadow: 0 0 25px rgba(0, 243, 253, 0.2);
+
+      .hobby-icon {
+        transform: scale(1.12); // Subtle zoom inside the circle
+      }
+    }
+
+    .text {
+      color: var(--accent);
+      border-color: rgba(var(--accent-rgb), 0.5);
+      text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.8);
+    }
+
+    .description {
+      opacity: 1;
+      max-height: 100px;
+      margin-top: 15px;
+    }
+  }
+}

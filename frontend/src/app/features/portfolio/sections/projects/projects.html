@@ -1,0 +1,77 @@
+<div class="section container">
+  <h2 class="section-title"><span class="kicker">02</span>build.log<span class="cursor">_</span></h2>
+
+  <div class="grid">
+    @for (p of sorted(); track p.id) {
+      <article class="project" [class.project--wip]="p.status === 'wip'">
+        <header class="project-head">
+          <h3>{{ p.name }}</h3>
+          @switch (p.status) {
+            @case ('wip') {
+              <span class="chip chip--warning"><span class="pulse" aria-hidden="true"></span>In development</span>
+            }
+            @case ('archived') {
+              <span class="chip">Archived</span>
+            }
+            @default {
+              <span class="chip">
+                {{ p.date | date: 'MMM yyyy' }}@if (p.endDate) { – {{ p.endDate | date: 'MMM yyyy' }}}
+              </span>
+            }
+          }
+        </header>
+
+        @if (p.awards) {
+          <p class="award"><app-icon name="award" [size]="16" /> {{ p.awards }}</p>
+        }
+
+        <p class="description" [class.collapsed]="isLong(p) && !isExpanded(p.id)" [id]="'desc-' + p.id">
+          {{ p.description }}
+        </p>
+        @if (isLong(p)) {
+          <button type="button" class="more" (click)="toggle(p.id)"
+                  [attr.aria-expanded]="isExpanded(p.id)" [attr.aria-controls]="'desc-' + p.id">
+            {{ isExpanded(p.id) ? '− less' : '+ more' }}
+          </button>
+        }
+
+        <div class="chip-row tech">
+          @for (t of splitTech(p.tech); track t) {
+            <span class="chip chip--accent">{{ t }}</span>
+          }
+        </div>
+
+        @if (p.contributors?.length) {
+          <div class="team">
+            <app-icon name="users" [size]="14" />
+            <span class="visually-hidden">Team:</span>
+            <div class="chip-row">
+              @for (c of p.contributors; track c.id) {
+                @if (c.link) {
+                  <a class="chip" [href]="c.link" target="_blank" rel="noopener">{{ c.name }}</a>
+                } @else {
+                  <span class="chip">{{ c.name }}</span>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        @if (p.liveLink || hasCode(p)) {
+          <footer class="actions">
+            @if (p.liveLink) {
+              <a class="btn btn--sm" [href]="p.liveLink" target="_blank" rel="noopener">
+                <app-icon name="external" [size]="14" /> Live
+              </a>
+            }
+            @if (hasCode(p)) {
+              <a class="btn btn--sm btn--ghost" [href]="p.link" target="_blank" rel="noopener">
+                <app-icon name="github" [size]="14" /> {{ p.status === 'wip' ? 'Progress' : 'Code' }}
+              </a>
+            }
+          </footer>
+        }
+      </article>
+    }
+  </div>
+</div>

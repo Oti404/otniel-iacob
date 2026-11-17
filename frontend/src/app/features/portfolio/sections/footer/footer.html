@@ -1,0 +1,38 @@
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="brand">
+      <p class="logo">otniel<span class="dot">.</span>iacob</p>
+      @if (profile()?.role) {
+        <p class="muted">{{ profile()?.role }} · {{ profile()?.location }}</p>
+      }
+    </div>
+
+    <nav class="links" aria-label="Footer">
+      <h2 class="footer-heading">Navigate</h2>
+      <ul>
+        @for (s of sections; track s.id) {
+          <li><button type="button" (click)="go(s.id)">{{ s.label }}</button></li>
+        }
+        <li><a routerLink="/adventures">Adventures</a></li>
+      </ul>
+    </nav>
+
+    @if (profile(); as p) {
+      <div class="social">
+        <h2 class="footer-heading">Connect</h2>
+        <div class="social-icons">
+          <a [href]="p.github" target="_blank" rel="noopener"><app-icon name="github" [size]="20" label="GitHub" /></a>
+          <a [href]="p.linkedin" target="_blank" rel="noopener"><app-icon name="linkedin" [size]="20" label="LinkedIn" /></a>
+          <a [href]="'mailto:' + p.email"><app-icon name="mail" [size]="20" label="Email" /></a>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="container bottom">
+    <p>&copy; {{ year }} {{ profile()?.name ?? 'Otniel Iacob' }}</p>
+    <button type="button" class="to-top" (click)="toTop()">
+      <app-icon name="arrow-up" [size]="14" /> Top
+    </button>
+  </div>
+</footer>

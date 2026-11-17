@@ -1,0 +1,83 @@
+@use "sass:map";
+
+// ─── Design tokens ───────────────────────────────────────────────────────────
+// Single source for colour, type, spacing and motion. Components use the CSS
+// custom properties; SCSS is only used for breakpoints (media queries can't
+// read custom properties).
+
+:root {
+  // Surfaces
+  --bg: #0a0a0f;
+  --surface: #11111a;
+  --surface-2: #181824;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  // Accents
+  --accent: #00ffcc;
+  --accent-rgb: 0, 255, 204;
+  --accent-soft: rgba(var(--accent-rgb), 0.1);
+  --accent-2: #ff00aa;
+  --accent-2-rgb: 255, 0, 170;
+  --accent-2-soft: rgba(var(--accent-2-rgb), 0.1);
+  --warning: #ffcc33;
+  --danger: #ff4d6d;
+
+  // Text
+  --text: #e6e6ef;
+  --text-muted: #8b8ba3;
+  --text-on-accent: #0a0a0f;
+
+  // Type
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+  --font-display: 'Orbitron', var(--font-mono);
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --fs-2xl: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+
+  // Spacing (4px scale)
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+
+  // Shape and effects
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --glow: 0 0 18px rgba(var(--accent-rgb), 0.25);
+  --glow-2: 0 0 18px rgba(var(--accent-2-rgb), 0.25);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 180ms;
+
+  // Layout
+  --container: 1120px;
+  --nav-h: 64px;
+}
+
+// ─── Breakpoints ─────────────────────────────────────────────────────────────
+$breakpoints: (
+  sm: 600px,
+  md: 900px,
+  lg: 1200px,
+);
+
+/// Styles for viewports narrower than the named breakpoint.
+@mixin below($name) {
+  @media (max-width: #{map.get($breakpoints, $name) - 0.02px}) {
+    @content;
+  }
+}
+
+/// Styles for viewports at least as wide as the named breakpoint.
+@mixin above($name) {
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}

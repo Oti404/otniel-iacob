@@ -1,0 +1,53 @@
+<app-adventures-topbar backLink="/adventures" backLabel="Adventures" />
+
+@if (loading()) {
+  <p class="state" role="status">Loading…</p>
+} @else if (error()) {
+  <p class="state state--error" role="alert">{{ error() }}</p>
+} @else if (chronicle(); as chr) {
+  <article>
+    <header class="chr-header">
+      @if (chr.coverImage) {
+        <div class="cover" [style.--cover-bg]="'url(' + (chr.coverImage | cldImg: 200) + ')'">
+          <img [src]="chr.coverImage | cldImg: 1280" [alt]="chr.title" fetchpriority="high" decoding="async" />
+          <div class="cover-shade"></div>
+        </div>
+      }
+      <div class="meta" [class.meta--no-cover]="!chr.coverImage">
+        <h1>{{ chr.title }}</h1>
+        @if (chr.description) {
+          <p class="desc">{{ chr.description }}</p>
+        }
+        @if (chr.publishedAt) {
+          <time class="date" [attr.datetime]="chr.publishedAt">{{ chr.publishedAt | date: 'MMMM d, yyyy' }}</time>
+        }
+      </div>
+    </header>
+
+    <div class="passages">
+      @for (p of passages(); track p.id; let i = $index) {
+        <section class="passage" [attr.aria-labelledby]="'p-' + p.id">
+          <header class="passage-head">
+            <span class="passage-num" aria-hidden="true">{{ num(i) }}</span>
+            <h2 [id]="'p-' + p.id">{{ p.title }}</h2>
+            @if (p.publishedAt) {
+              <time [attr.datetime]="p.publishedAt">{{ p.publishedAt | date: 'MMM d' }}</time>
+            }
+          </header>
+
+          @if (p.content) {
+            <div class="passage-body">{{ p.content }}</div>
+          }
+
+          @if (p.media.length) {
+            <app-media-carousel [media]="p.media" [title]="p.title" />
+          }
+        </section>
+      } @empty {
+        <p class="state">No passages yet.</p>
+      }
+
+      <app-subscribe-panel [chronicleId]="chr.id" />
+    </div>
+  </article>
+}
