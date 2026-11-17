@@ -2,60 +2,63 @@
 
 ---
 
-## 1. Structura proiectului
+## 1. Project structure
 
 ```
 /
-├── frontend/         Angular 21 — SPA + admin panel
+├── frontend/         Angular 21 — SPA + admin panel + adventures
 ├── backend/          Express + TypeScript — REST API
-├── shared/           Tipuri TypeScript + scheme Zod (sursa de adevăr)
-├── database/         Prisma schema, migrări, seed script
-├── n8n/workflows/    Export JSON workflow n8n (backup/referință)
+├── shared/           TypeScript types + Zod schemas (source of truth)
+├── database/         Prisma schema, migrations, seed script
+├── n8n/workflows/    n8n workflow JSON export (backup/reference)
 ├── scripts/          setup-ec2.sh, setup-nginx.sh, nginx configs
-├── docs/             Documentație, sprints, securitate
-└── .github/          GitHub Actions (deploy automat)
+├── docs/             Documentation, sprints, security
+└── .github/          GitHub Actions (auto deploy)
 ```
 
 ---
 
-## 2. Prerequisite locale
+## 2. Prerequisites
 
 - **Node.js 20+**
-- **Docker Desktop** (pornit)
-- **npm** (vine cu Node)
+- **Docker Desktop** (running)
+- **npm** (comes with Node)
 
 ---
 
-## 3. Setup local
+## 3. Local setup
 
 ```bash
-# 1. Clonează repo
+# 1. Clone repo
 git clone https://github.com/Oti404/otniel-iacob.git
 cd otniel-iacob
 
-# 2. Copiază și completează variabilele de mediu
+# 2. Copy and fill in env vars
 cp .env.example .env
-# Editează .env: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB,
-#               JWT_SECRET (min 32 chars), JWT_REFRESH_SECRET, ADMIN_PASSWORD
+# Edit .env — minimum required:
+#   POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+#   JWT_SECRET (min 16 chars), JWT_REFRESH_SECRET, JWT_SUBSCRIBER_SECRET
+#   ADMIN_PASSWORD, INTERNAL_API_KEY (min 16 chars)
+#   ALLOWED_ORIGINS=http://localhost:4200
 
-# 3. Instalează dependențe
+# 3. Install dependencies
 npm install
 
-# 4. Pornește
-run.bat   # Windows — selectează modul din meniu
+# 4. Start
+run.bat   # Windows — select mode from menu
 ```
 
-### Moduri de rulare (run.bat)
+### Run modes (run.bat)
 
-| Opțiune | Ce pornește | Când să folosești |
-|---------|------------|-------------------|
-| `[1]` Full Docker | Tot în Docker (fără live reload) | Test identic cu producția |
-| `[2]` Hybrid | DB în Docker, frontend+backend cu npm (live reload) | Development activ |
+| Option | What starts | When to use |
+|--------|------------|-------------|
+| `[1]` Full Docker | Everything in Docker (no live reload) | Test identical to production |
+| `[2]` Hybrid | DB in Docker, frontend+backend via npm (live reload) | Active development |
 
-### Manual (fără run.bat)
+### Manual (without run.bat)
 
 ```bash
-# Hybrid — DB în Docker, aplicații local cu live reload
+# Hybrid — DB in Docker, apps local with live reload
 docker compose up -d postgres
 npm run dev
 
@@ -63,101 +66,155 @@ npm run dev
 docker compose up -d --build
 ```
 
-**Notă:** n8n NU rulează local — rulează doar pe server. Modulul AI chat din admin panel necesită conexiunea la serverul de producție (sau un n8n local configurat manual).
+**Note:** n8n does NOT run locally — it runs on the server only. The AI chat admin module requires a connection to the production server (or a manually configured local n8n).
 
 ---
 
-## 4. Porturi locale
+## 4. Local ports
 
-| Serviciu | URL |
+| Service | URL |
 |---------|-----|
 | Frontend (dev) | http://localhost:4200 |
 | Frontend (Docker) | http://localhost:80 |
 | Backend API | http://localhost:3000 |
-| Admin Panel | http://localhost:4200/admin sau http://localhost:80/admin |
+| Admin Panel | http://localhost:4200/admin |
+| Adventures | http://localhost:4200/#/adventures |
 | PostgreSQL | localhost:5433 |
 
 ---
 
 ## 5. NPM Workspaces
 
-Root `package.json` conectează toate pachetele ca workspaces:
+Root `package.json` connects all packages as workspaces:
 
 ```bash
-npm run dev              # Frontend + backend concurent (cu live reload)
-npm run dev:frontend     # Doar frontend
-npm run dev:backend      # Doar backend
-npm run build:frontend   # Build producție frontend
+npm run dev              # Frontend + backend concurrently (with live reload)
+npm run dev:frontend     # Frontend only
+npm run dev:backend      # Backend only
+npm run build:frontend   # Production frontend build
+npm run build:all        # shared → backend → frontend
 ```
 
 ---
 
-## 6. Baza de date
+## 6. Database
 
 ```bash
-# Aplică migrări
+# Apply migrations
 cd database && npx prisma migrate dev
 
-# Rulează seed (crează admin user + date exemplu)
+# Run seed (creates admin user + sample data)
 cd database && npx ts-node --transpile-only seed.ts
 
-# Prisma Studio (interfață vizuală)
+# Prisma Studio (visual interface)
 cd database && npx prisma studio
 ```
 
-Credențialele admin sunt setate din variabila `ADMIN_PASSWORD` în `.env`.
+Admin credentials are set from the `ADMIN_PASSWORD` variable in `.env`.
+
+**Important:** n8n and portfolio share the same DB. `prisma migrate dev` detects drift from n8n tables. For schema changes in production, apply SQL directly and then run `prisma generate` — do not use `migrate dev` against the production DB.
 
 ---
 
-## 7. Convenții de cod
+## 7. Code conventions
 
 ### Backend
-- Validare input cu **Zod** pe toate rutele POST/PUT
-- **Niciodată** `req.body` direct fără `safeParse`
-- IDs validate cu funcția `id()` din `admin.ts` — protecție NaN
-- Tipuri din `@monorepo/shared` sau definite local în rută
+- Validate all input with **Zod** on every POST/PUT route
+- **Never** use `req.body` directly without `safeParse`
+- IDs validated with the `id()` helper from `admin.ts` — NaN protection
+- All types from `@monorepo/shared` or defined locally in the route
+- Auth tokens carry an explicit `type` claim (`'admin'` / `'subscriber'`) — always check it
 
 ### Frontend
-- Componente **standalone** (fără NgModule)
-- HTTP calls exclusiv prin **servicii** — niciodată direct în componente
-- Admin panel: design system variabile CSS (`--admin-*`) — fără hex hardcodat
+- **Standalone** components (no NgModule)
+- HTTP calls exclusively through **services** — never directly in components
+- Admin panel: CSS design-system variables (`--admin-*`) — no hardcoded hex
+- Adventures module: lazy-loaded, separate from admin
 
 ### General
-- Nicio cheie sau secret în cod sursă
-- Orice câmp nou în Prisma = migrare nouă (`prisma migrate dev`)
-- Commits în română sau engleză — mesaj descriptiv
+- No keys or secrets in source code
+- Any new Prisma field = new migration (`prisma migrate dev`)
+- Commits in English or Romanian — descriptive message
 
 ---
 
-## 8. n8n (AI Project Intake)
+## 8. Adventures feature
 
-n8n rulează **doar pe server**, nu local. Workflow-ul este exportat în `n8n/workflows/program.json` ca backup.
+All 7 phases complete. See [planning/adventures-feature.md](planning/adventures-feature.md) for the full plan.
 
-**Acces n8n pe server (via SSH tunnel):**
+### Required env vars (add to `.env` for local dev)
+
 ```bash
-ssh -i key.pem -N -L 5678:127.0.0.1:5678 ubuntu@13.60.216.226
-# Apoi deschide http://localhost:5678
+# Cloudinary — image/video uploads (optional; feature gracefully skips if absent)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Google OAuth — subscriber login (returns 503 if absent)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+FRONTEND_URL=http://localhost:4200
+
+# Web Push — push notifications (optional; feature gracefully skips if absent)
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:otnieliacob@gmail.com
 ```
 
-**La primul deploy sau după reinstalare:**
-1. Importă `n8n/workflows/program.json` în n8n
-2. Configurează credențialele: Google Gemini API + PostgreSQL
-3. Publish workflow-ul (nu doar Save)
+### Generate VAPID keys (one-time)
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+### Subscriber auth vs admin auth
+
+| | Admin | Subscriber |
+|--|-------|-----------|
+| Login method | Email/password | Google OAuth |
+| Token secret | `JWT_SECRET` | `JWT_SUBSCRIBER_SECRET` |
+| Cookie | `refresh_token` | `subscriber_token` |
+| Token type claim | `'admin'` | `'subscriber'` |
+| Scope | All `/api/admin/*` routes | Subscriptions + push only |
 
 ---
 
-## 9. Fișiere importante
+## 9. n8n (AI Project Intake)
 
-| Fișier | Rol |
-|--------|-----|
-| `backend/index.ts` | Entry point backend — middleware, rute, validare startup |
-| `backend/middleware/auth.ts` | JWT verification |
-| `backend/routes/admin.ts` | CRUD pentru toate entitățile |
-| `backend/routes/auth.ts` | Login, refresh, logout |
-| `backend/routes/internal.ts` | Endpoint-uri pentru n8n (protejate cu INTERNAL_API_KEY) |
-| `database/prisma/schema.prisma` | Schema bazei de date |
-| `database/seed.ts` | Creare admin user + date inițiale |
-| `scripts/setup-nginx.sh` | Instalare/configurare nginx idempotentă |
-| `scripts/nginx-prod.conf` | Config nginx HTTP |
-| `scripts/nginx-prod-ssl.conf` | Config nginx HTTPS (cu domeniu) |
-| `.github/workflows/deploy-aws.yml` | Pipeline CI/CD automat |
+n8n runs **only on the server**, not locally. The workflow is exported in `n8n/workflows/program.json` as backup.
+
+**Access n8n on server (via SSH tunnel):**
+```bash
+ssh -i key.pem -N -L 5678:127.0.0.1:5678 ubuntu@13.60.216.226
+# Then open http://localhost:5678
+```
+
+**On first deploy or after reinstall:**
+1. Import `n8n/workflows/program.json` into n8n
+2. Configure credentials: Google Gemini API + PostgreSQL
+3. Publish the workflow (not just Save)
+
+---
+
+## 10. Key files reference
+
+| File | Role |
+|------|------|
+| `backend/index.ts` | Backend entry point — middleware, routes, startup validation |
+| `backend/middleware/auth.ts` | JWT verification (admin tokens only) |
+| `backend/routes/admin.ts` | CRUD for all portfolio entities |
+| `backend/routes/admin-chronicles.ts` | CRUD for chronicles, passages, media + publish triggers |
+| `backend/routes/auth.ts` | Admin login, refresh, logout |
+| `backend/routes/subscriber-auth.ts` | Google OAuth flow + subscriber session |
+| `backend/routes/subscriptions.ts` | Subscriber subscription management |
+| `backend/routes/push.ts` | Web Push subscribe/unsubscribe + VAPID key endpoint |
+| `backend/routes/internal.ts` | Internal endpoints for n8n (protected by INTERNAL_API_KEY) |
+| `backend/services/cloudinary.ts` | Cloudinary upload/delete helpers |
+| `backend/services/push.ts` | `notifySubscribers()` — sends Web Push on chronicle/passage publish |
+| `database/prisma/schema.prisma` | Database schema |
+| `database/seed.ts` | Admin user + initial data |
+| `scripts/setup-nginx.sh` | Idempotent nginx install/configure |
+| `scripts/nginx-prod.conf` | nginx HTTP config |
+| `scripts/nginx-prod-ssl.conf` | nginx HTTPS config (with domain) |
+| `.github/workflows/deploy-aws.yml` | Automatic CI/CD pipeline |

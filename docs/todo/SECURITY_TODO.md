@@ -47,6 +47,44 @@ Excepții neprinse aruncau stack trace complet la client. Handler global adăuga
 
 ---
 
+---
+
+## AUDIT 2026-06-16 — COMPLETATE
+
+See full report: `docs/security/SECURITY-AUDIT-2026-06-16.md`
+
+### [x] C1. Admin auth bypass via shared JWT secret — FIXED 2026-06-16
+Subscriber (Google OAuth) tokens signed with a separate `JWT_SUBSCRIBER_SECRET`. Both token types carry an explicit `type` claim (`'admin'`/`'subscriber'`) checked on verify. Startup crashes if `JWT_SUBSCRIBER_SECRET` is missing, short, or equal to `JWT_SECRET`.
+
+### [x] H1. Dependency vulnerabilities (7 high / 3 moderate) — FIXED 2026-06-16
+`npm audit fix` run; Angular 21 patched packages, `qs`, `express-rate-limit` → `ip-address` all updated.
+
+### [x] H2. Google OAuth login-CSRF — no `state` parameter — FIXED 2026-06-16
+CSRF state nonce now generated at `/api/auth/google`, stored in `httpOnly` cookie (`sameSite: lax`), validated in callback before processing code exchange.
+
+### [x] M1. AI-chat proxy no rate limit — FIXED 2026-06-16
+Rate limiter added: 20 requests / 5 min on `/api/admin/ai-chat`.
+
+### [x] M2. Subscriber-auth routes not rate-limited — FIXED 2026-06-16
+Separate `subscriberLimiter` (100 req / 15 min) applied to subscriber-auth router.
+
+### [x] M3. SVG uploads allowed (stored XSS) — FIXED 2026-06-16
+SVG removed from MIME and extension whitelist in `backend/routes/upload.ts`.
+
+### [x] M4. Shared rate-limit budget for login + refresh — FIXED 2026-06-16
+Budgets split: `loginLimiter` (10 / 15 min) on `/login`, `refreshLimiter` (60 / 15 min) on `/refresh`.
+
+### [x] L2. subscriptions DELETE NaN guard — FIXED 2026-06-16
+`Number.isInteger(id) && id >= 1` check added in `routes/subscriptions.ts`.
+
+### [x] L3. YouTube embed trust bypass — FIXED 2026-06-16
+Video ID validated against `^[A-Za-z0-9_-]{11}$` before `bypassSecurityTrustResourceUrl`.
+
+### [x] L6. Divergent auth error messages — FIXED 2026-06-16
+`/api/auth/refresh` error messages normalized (no user enumeration).
+
+---
+
 ## CRITICE — DE REZOLVAT IMEDIAT
 
 ### [x] 11. INTERNAL_API_KEY hardcodat în workflow n8n (CRITICAL) — rezolvat 2026-05-09
@@ -215,3 +253,25 @@ Operațiile de DELETE șterg permanent. Adaugă câmp `deletedAt` pe modele crit
 - HSTS upgradat cu directiva `preload`
 
 **Nota:** `.env`-ul local NU este comis în git — `.gitignore` funcționează corect. Secretele de producție sunt exclusiv în GitHub Secrets și pe server.
+
+---
+
+## REZUMAT AUDIT 2026-06-16
+
+See full report: `docs/security/SECURITY-AUDIT-2026-06-16.md`
+
+| ID | Severity | Title | Status |
+|----|----------|-------|--------|
+| C1 | CRITICAL | Admin auth bypass — subscriber token replayable as admin | ✅ FIXED |
+| H1 | HIGH | Dependency vulnerabilities (7 high / 3 moderate) | ✅ FIXED |
+| H2 | HIGH | Google OAuth login-CSRF — no `state` parameter | ✅ FIXED |
+| M1 | MEDIUM | AI-chat proxy has no rate limit | ✅ FIXED |
+| M2 | MEDIUM | Subscriber-auth routes not rate-limited | ✅ FIXED |
+| M3 | MEDIUM | SVG uploads allowed (stored XSS) | ✅ FIXED |
+| M4 | MEDIUM | Shared rate-limit budget for login + refresh | ✅ FIXED |
+| L1 | LOW | `/api/health` discloses DB connectivity state | Open (accepted) |
+| L2 | LOW | `subscriptions` DELETE doesn't guard NaN id | ✅ FIXED |
+| L3 | LOW | YouTube embed via `bypassSecurityTrustResourceUrl` + weak regex | ✅ FIXED |
+| L4 | LOW | No SRI on external CDN CSS | Open |
+| L5 | LOW | Subscriber JWT lives 30 days, no rotation/revocation | Open (accepted) |
+| L6 | LOW | Auth error messages differ | ✅ FIXED |
