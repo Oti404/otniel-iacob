@@ -1,6 +1,6 @@
 # Personal Portfolio — Monorepo
 
-Angular 21 + Node.js/Express + Prisma + PostgreSQL + n8n, deployed on AWS EC2.
+Angular 21 + Node.js/Express + Prisma + PostgreSQL, deployed on AWS EC2.
 
 Built as both a personal portfolio and a technical sandbox for AI-assisted development workflows, DevSecOps practices, and automation.
 
@@ -13,7 +13,6 @@ Built as both a personal portfolio and a technical sandbox for AI-assisted devel
 | Frontend | Angular 21, SCSS, Nginx |
 | Backend | Node.js, Express, TypeScript |
 | Database | PostgreSQL 15, Prisma ORM |
-| Automation | n8n (self-hosted) |
 | Auth | JWT (access token in memory + httpOnly refresh cookie) |
 | Infrastructure | Docker Compose (local), AWS EC2 (prod) |
 
@@ -27,7 +26,6 @@ Built as both a personal portfolio and a technical sandbox for AI-assisted devel
 ├── backend/      Express API + file upload
 ├── shared/       TypeScript interfaces + Zod schemas (source of truth for types)
 ├── database/     Prisma schema, migrations, seed script
-├── n8n/          Workflow exports
 ├── e2e/          End-to-end tests
 ├── scripts/      Dev/build/deploy automation
 └── docs/         Architecture decisions, sprints, agent wardrobe
@@ -57,7 +55,7 @@ cp .env.example .env
 run.bat
 ```
 
-Choose `[1]` for full Docker (no live reload) or `[2]` for hybrid mode (Docker for DB/n8n, npm for apps with live reload).
+Choose `[1]` for full Docker (no live reload) or `[2]` for hybrid mode (Docker for the DB, npm for apps with live reload).
 
 **Option B — Manual**
 
@@ -72,8 +70,6 @@ npm run dev
 # Full Docker
 docker-compose up -d --build
 ```
-
-> **Note:** n8n runs on the production server only — not locally. The AI chat module in the admin panel requires the production server or a manually configured local n8n instance.
 
 ### Ports
 

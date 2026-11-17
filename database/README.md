@@ -46,11 +46,5 @@ npx prisma studio                                 # visual DB browser (local onl
 - `Experience.description` is stored as JSON array of strings
 - Deleting a Semester cascades to all its Subjects
 
-## Dev vs Prod database separation
-In dev, n8n and the portfolio backend share the same PostgreSQL container but use **different databases**:
-- `monorepodb` — used by n8n (all n8n internal tables)
-- `portfoliodb` — used by the portfolio backend (Prisma-managed tables only)
-
-This separation is required because Prisma detects n8n tables as "drift" and blocks migrations if both apps share the same database.
-
-In prod, the backend container uses `monorepodb` via the internal docker network (`postgres:5432`). n8n in prod uses its own data directory and doesn't conflict.
+## Prod database note
+n8n used to share the prod database (`monorepodb`) and left its own tables there (n8n was removed 2026-11-17). Prisma reports those tables as drift in `migrate dev`; they are unused and can be dropped by hand.

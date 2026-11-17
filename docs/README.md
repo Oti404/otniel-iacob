@@ -1,7 +1,7 @@
 # Documentation Index
 
 ## Guides
-- [DEVELOPMENT.md](DEVELOPMENT.md) — local setup, dev commands, code conventions, n8n access
+- [DEVELOPMENT.md](DEVELOPMENT.md) — local setup, dev commands, code conventions
 - [OPERATIONS.md](OPERATIONS.md) — deployment pipeline, EC2 infrastructure, GitHub Secrets, rollback
 
 ## Planning

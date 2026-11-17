@@ -32,11 +32,9 @@ push → main
 | Frontend (Docker) | 127.0.0.1:8080 | internal |
 | Backend Express (Docker) | 127.0.0.1:3000 | internal |
 | PostgreSQL (Docker) | internal (no host port) | internal |
-| n8n (Docker) | 127.0.0.1:5678 | internal, access via SSH tunnel |
 
 **Server:** AWS EC2 `13.60.216.226`  
 **SSH:** `ssh -i key.pem ubuntu@13.60.216.226`  
-**n8n access:** `ssh -i key.pem -N -L 5678:127.0.0.1:5678 ubuntu@13.60.216.226` → browser at `http://localhost:5678`
 
 ---
 
@@ -57,8 +55,6 @@ push → main
 | `JWT_SUBSCRIBER_SECRET` | min 32 chars random, different from JWT_SECRET | yes |
 | `ADMIN_PASSWORD` | admin panel password | yes |
 | `ALLOWED_ORIGINS` | `http://13.60.216.226` | yes |
-| `INTERNAL_API_KEY` | min 32 chars random | yes |
-| `N8N_WEBHOOK_ID` | UUID from n8n workflow | yes |
 | `FRONTEND_URL` | `http://13.60.216.226` (or domain if SSL) | yes |
 
 ### Adventures — Cloudinary
@@ -148,7 +144,7 @@ Full audit at `docs/security/SECURITY-AUDIT-2026-06-16.md`. Current status:
 - **Fixed:** C1 (admin auth bypass via shared JWT — subscriber tokens now use a separate `JWT_SUBSCRIBER_SECRET`), H1 (npm vulns), H2 (OAuth CSRF state), M1 (AI-chat rate limit), M2 (subscriber-auth rate limit), M3 (SVG upload removed), M4 (login/refresh split rate limits), L2/L3/L6
 - **Accepted open:** L1 (`/api/health` DB disclosure), L5 (30d subscriber JWT)
 - **Open:** L4 (SRI for CDN assets), I1–I6 (process improvements)
-- `/api/internal/` blocked at nginx (returns 403 for all public requests)
+- n8n and the `/api/internal` API were removed on 2026-11-17; projects are added by hand in the admin panel
 - CSP, Permissions-Policy, HSTS preload active in nginx configs
 
 ---

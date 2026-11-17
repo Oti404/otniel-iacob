@@ -10,7 +10,6 @@
 ├── backend/          Express + TypeScript — REST API
 ├── shared/           TypeScript types + Zod schemas (source of truth)
 ├── database/         Prisma schema, migrations, seed script
-├── n8n/workflows/    n8n workflow JSON export (backup/reference)
 ├── scripts/          setup-ec2.sh, setup-nginx.sh, nginx configs
 ├── docs/             Documentation, sprints, security
 └── .github/          GitHub Actions (auto deploy)
@@ -37,8 +36,8 @@ cd otniel-iacob
 cp .env.example .env
 # Edit .env — minimum required:
 #   POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
-#   JWT_SECRET (min 16 chars), JWT_REFRESH_SECRET, JWT_SUBSCRIBER_SECRET
-#   ADMIN_PASSWORD, INTERNAL_API_KEY (min 16 chars)
+#   JWT_SECRET, JWT_REFRESH_SECRET, JWT_SUBSCRIBER_SECRET (min 32 chars each)
+#   ADMIN_PASSWORD
 #   ALLOWED_ORIGINS=http://localhost:4200
 
 # 3. Install dependencies
@@ -65,8 +64,6 @@ npm run dev
 # Full Docker
 docker compose up -d --build
 ```
-
-**Note:** n8n does NOT run locally — it runs on the server only. The AI chat admin module requires a connection to the production server (or a manually configured local n8n).
 
 ---
 
@@ -112,7 +109,7 @@ cd database && npx prisma studio
 
 Admin credentials are set from the `ADMIN_PASSWORD` variable in `.env`.
 
-**Important:** n8n and portfolio share the same DB. `prisma migrate dev` detects drift from n8n tables. For schema changes in production, apply SQL directly and then run `prisma generate` — do not use `migrate dev` against the production DB.
+**Important:** n8n (removed 2026-11-17) left its tables in the prod DB, so `prisma migrate dev` reports drift there. Write new migrations by hand in `database/prisma/migrations/<timestamp>_<name>/migration.sql`; `migrate deploy` applies them on container start. Never run `migrate dev` against the production DB.
 
 ---
 
@@ -180,36 +177,20 @@ npx web-push generate-vapid-keys
 
 ---
 
-## 9. n8n (AI Project Intake)
-
-n8n runs **only on the server**, not locally. The workflow is exported in `n8n/workflows/program.json` as backup.
-
-**Access n8n on server (via SSH tunnel):**
-```bash
-ssh -i key.pem -N -L 5678:127.0.0.1:5678 ubuntu@13.60.216.226
-# Then open http://localhost:5678
-```
-
-**On first deploy or after reinstall:**
-1. Import `n8n/workflows/program.json` into n8n
-2. Configure credentials: Google Gemini API + PostgreSQL
-3. Publish the workflow (not just Save)
-
----
-
-## 10. Key files reference
+## 9. Key files reference
 
 | File | Role |
 |------|------|
 | `backend/index.ts` | Backend entry point — middleware, routes, startup validation |
 | `backend/middleware/auth.ts` | JWT verification (admin tokens only) |
-| `backend/routes/admin.ts` | CRUD for all portfolio entities |
-| `backend/routes/admin-chronicles.ts` | CRUD for chronicles, passages, media + publish triggers |
+| `backend/routes/admin/index.ts` | JWT gate for all admin routers |
+| `backend/routes/admin/content.ts` | CRUD for all portfolio entities |
+| `backend/routes/admin/{chronicles,passages,media}.ts` | Adventures CRUD + publish triggers |
+| `backend/middleware/error-handler.ts` | Maps thrown errors to HTTP responses |
 | `backend/routes/auth.ts` | Admin login, refresh, logout |
 | `backend/routes/subscriber-auth.ts` | Google OAuth flow + subscriber session |
 | `backend/routes/subscriptions.ts` | Subscriber subscription management |
 | `backend/routes/push.ts` | Web Push subscribe/unsubscribe + VAPID key endpoint |
-| `backend/routes/internal.ts` | Internal endpoints for n8n (protected by INTERNAL_API_KEY) |
 | `backend/services/cloudinary.ts` | Cloudinary upload/delete helpers |
 | `backend/services/push.ts` | `notifySubscribers()` — sends Web Push on chronicle/passage publish |
 | `database/prisma/schema.prisma` | Database schema |
