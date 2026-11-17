@@ -1,21 +1,9 @@
 import { Router, Request, Response } from 'express';
-import * as jwt from 'jsonwebtoken';
 import { prisma } from '@monorepo/database';
 import { subscriptionSchema } from '@monorepo/shared';
+import { getSubscriber } from '../middleware/subscriber';
 
 const router = Router();
-
-async function getSubscriber(req: Request) {
-  const token = req.cookies?.subscriber_token;
-  if (!token) return null;
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SUBSCRIBER_SECRET!) as { sub: string; type: string };
-    if (payload.type !== 'subscriber') return null;
-    return await prisma.googleSubscriber.findUnique({ where: { googleId: payload.sub } });
-  } catch {
-    return null;
-  }
-}
 
 // GET /api/subscriptions/mine
 router.get('/mine', async (req: Request, res: Response) => {
@@ -57,6 +45,19 @@ router.post('/', async (req: Request, res: Response) => {
   }
 
   const resolvedChrId = type === 'GLOBAL' ? null : (chronicleId ?? null);
+
+  // Only published chronicles can be followed; otherwise the FK error (500 vs 201)
+  // would reveal which unpublished chronicle ids exist.
+  if (resolvedChrId !== null) {
+    const chronicle = await prisma.chronicle.findFirst({
+      where: { id: resolvedChrId, publishedAt: { not: null } },
+      select: { id: true },
+    });
+    if (!chronicle) {
+      res.status(404).json({ message: 'Chronicle not found' });
+      return;
+    }
+  }
 
   // findFirst + create to handle NULL correctly in the unique constraint
   const existing = await prisma.subscription.findFirst({

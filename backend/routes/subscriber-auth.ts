@@ -75,8 +75,13 @@ router.get('/google/callback', async (req: Request, res: Response) => {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
     const profile = await profileRes.json() as {
-      id: string; email: string; name: string; picture?: string;
+      id: string; email: string; verified_email?: boolean; name: string; picture?: string;
     };
+
+    if (!profileRes.ok || !profile.id || profile.verified_email !== true) {
+      res.redirect(`${frontendUrl()}/#/adventures?auth=error`);
+      return;
+    }
 
     const subscriber = await prisma.googleSubscriber.upsert({
       where: { googleId: profile.id },

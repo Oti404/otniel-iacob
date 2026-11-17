@@ -5,12 +5,12 @@ self.addEventListener('push', event => {
       body: data.body ?? '',
       icon: '/favicon.ico',
       badge: '/favicon.ico',
-      data: { url: data.url ?? '/adventures' },
+      data: { url: data.url ?? '/#/adventures' },
     })
   );
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  event.waitUntil(clients.openWindow(event.notification.data?.url ?? '/adventures'));
+  event.waitUntil(clients.openWindow(event.notification.data?.url ?? '/#/adventures'));
 });
