@@ -13,31 +13,32 @@ if (isPushConfigured()) {
   );
 }
 
-export async function notifySubscribers(scope: 'global' | 'chronicle', chronicleId?: number): Promise<void> {
+/**
+ * scope 'global'    → a chronicle was published: notify GLOBAL subscribers.
+ * scope 'chronicle' → a passage was published: notify that chronicle's followers
+ *                     and GLOBAL subscribers ("all chronicles").
+ * URLs use the hash form because the SPA uses hash routing.
+ */
+export async function notifySubscribers(scope: 'global' | 'chronicle', chronicleId: number): Promise<void> {
   if (!isPushConfigured()) return;
 
-  const include = { subscriber: { include: { pushSubscriptions: true } } } as const;
+  const chronicle = await prisma.chronicle.findUnique({ where: { id: chronicleId } });
+  if (!chronicle) return;
 
-  const subscriptions = scope === 'global'
-    ? await prisma.subscription.findMany({ where: { type: 'GLOBAL' }, include })
-    : await prisma.subscription.findMany({ where: { type: 'CHRONICLE', chronicleId: chronicleId ?? null }, include });
+  const subscriptions = await prisma.subscription.findMany({
+    where: scope === 'global'
+      ? { type: 'GLOBAL' }
+      : { OR: [{ type: 'GLOBAL' }, { type: 'CHRONICLE', chronicleId }] },
+    include: { subscriber: { include: { pushSubscriptions: true } } },
+  });
 
   const pushSubs = subscriptions.flatMap(s => s.subscriber.pushSubscriptions);
   const unique = [...new Map(pushSubs.map(p => [p.endpoint, p])).values()];
   if (unique.length === 0) return;
 
-  let title = 'New adventure';
-  let body = '';
-  let url = '/adventures';
-
-  if (chronicleId) {
-    const chronicle = await prisma.chronicle.findUnique({ where: { id: chronicleId } });
-    if (chronicle) {
-      title = scope === 'global' ? 'New chronicle published' : `New passage in ${chronicle.title}`;
-      body = chronicle.title;
-      url = `/adventures/${chronicleId}`;
-    }
-  }
+  const title = scope === 'global' ? 'New chronicle published' : `New passage in ${chronicle.title}`;
+  const body = scope === 'global' ? chronicle.title : 'A new passage is up. Tap to read.';
+  const url = `/#/adventures/${chronicleId}`;
 
   const payload = JSON.stringify({ title, body, url });
 

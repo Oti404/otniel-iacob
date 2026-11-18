@@ -1,0 +1,51 @@
+<div class="academic-container" #academicContainer>
+
+  <header class="journey-header">
+    <h1>// ACADEMIC_JOURNEY_LOG <span class="blink">_</span></h1>
+    <div class="subtitle">SYSTEM STATUS: ONLINE</div>
+  </header>
+
+  <div class="journey-layout">
+
+    <nav class="academic-sidebar">
+      @for (sem of academicData; track sem) {
+        <li>
+          <a (click)="selectSemester(sem)" [class.active]="activeSemester?.id === sem.id">
+            <span class="icon-bracket">[</span>
+            {{ sem.name }}
+            <span class="icon-bracket">]</span>
+          </a>
+        </li>
+      }
+    </nav>
+
+    <main class="academic-content">
+      @if (activeSemester) {
+        <div class="semester-section fade-in">
+          <h2 class="semester-divider">
+            <span>{{ activeSemester.name }}</span>
+            <div class="stats-badge">{{ activeSemester.subjects.length }} MODULE</div>
+          </h2>
+          <div class="subjects-grid">
+            @for (sub of activeSemester.subjects; track sub) {
+              <div class="subject-card" (click)="openModal(sub)">
+                <h3>{{ sub.name }}</h3>
+                <span class="status-dot" [class.passed]="sub.passed"></span>
+                <div class="card-hint">Tap to access data ></div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </main>
+
+  </div>
+
+  @if (selectedSubject) {
+    <app-subject-details-modal
+      [subject]="selectedSubject"
+      (close)="closeModal()">
+    </app-subject-details-modal>
+  }
+
+</div>

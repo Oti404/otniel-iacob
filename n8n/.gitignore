@@ -1,8 +1,0 @@
-# Local n8n data directories
-/.n8n
-/data
-/custom
-
-# Backups
-*.json.bak
-*.zip

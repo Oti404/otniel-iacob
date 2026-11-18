@@ -23,6 +23,13 @@ async function main() {
     create: { email: 'otnieliacob@gmail.com', passwordHash },
   });
 
+  // The seed runs on every container start. Content is only seeded into an empty
+  // database; otherwise rows deleted in the admin panel would come back on deploy.
+  if (await prisma.profile.count() > 0) {
+    console.log('Seed: admin user synced, content already present — skipping content seed.');
+    return;
+  }
+
   // ─── PROFILE ─────────────────────────────────────────────────────────────────
   await prisma.profile.upsert({
     where: { id: 1 },

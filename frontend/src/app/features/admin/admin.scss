@@ -1,0 +1,282 @@
+/* Admin panel — uses the global tokens from src/styles/_tokens.scss */
+
+/* Base reset for admin scope */
+.admin-root {
+  font-family: var(--font-mono);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* Inputs */
+.admin-input,
+.admin-select,
+.admin-textarea {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+    background: var(--surface-2);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  option {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+}
+
+.admin-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+input[type="date"].admin-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+/* Buttons */
+.admin-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+
+  &:hover {
+    background: var(--accent-soft);
+    box-shadow: var(--glow);
+  }
+
+  &.admin-btn-primary {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  &.admin-btn-danger {
+    border-color: var(--danger);
+    color: var(--danger);
+    &:hover { background: rgba(255, 51, 85, 0.15); }
+  }
+
+  &.admin-btn-accent {
+    border-color: var(--accent-2);
+    color: var(--accent-2);
+    &:hover { background: var(--accent-2-soft); }
+  }
+
+  &.admin-btn-sm {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* Cards */
+.admin-card {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+/* Table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-strong);
+  }
+
+  th {
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--surface-2);
+  }
+
+  tr:hover td {
+    background: var(--surface-2);
+  }
+}
+
+/* Form groups */
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.admin-label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Status badges */
+.admin-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: bold;
+
+  &.badge-completed { color: var(--accent); border: 1px solid var(--accent); }
+  &.badge-wip { color: var(--warning); border: 1px solid var(--warning); }
+  &.badge-archived { color: var(--text-muted); border: 1px solid var(--text-muted); }
+  &.badge-job { color: var(--accent); border: 1px solid var(--accent); }
+  &.badge-education { color: var(--accent-2); border: 1px solid var(--accent-2); }
+  &.badge-event { color: var(--warning); border: 1px solid var(--warning); }
+  &.badge-on { color: var(--accent); border: 1px solid var(--accent); }
+  &.badge-off { color: var(--text-muted); border: 1px solid var(--text-muted); }
+}
+
+/* Section header */
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-strong);
+
+  h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+
+    &::before { content: '> '; opacity: 0.6; }
+  }
+}
+
+/* Notifications */
+.admin-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  letter-spacing: 1px;
+  z-index: 9999;
+  animation: slideIn 0.2s ease;
+
+  &.toast-success {
+    background: rgba(0, 255, 204, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+
+  &.toast-error {
+    background: rgba(255, 51, 85, 0.15);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+  }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Checkbox */
+.admin-checkbox {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Inline actions (order buttons) */
+.admin-order-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  button {
+    background: none;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    padding: 2px 6px;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 2px;
+    line-height: 1;
+    transition: all var(--dur) var(--ease);
+
+    &:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    &:disabled { opacity: 0.2; cursor: not-allowed; }
+  }
+}
+
+/* Confirmation inline */
+.admin-confirm-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--danger);
+}
+
+/* Dynamic list items */
+.admin-dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .dynamic-item {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+
+    input { flex: 1; }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+}

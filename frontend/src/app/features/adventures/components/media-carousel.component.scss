@@ -1,0 +1,172 @@
+@use 'tokens' as *;
+
+:host {
+  display: block;
+  margin-top: var(--s-5);
+}
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  // Let vertical page scroll pass through while horizontal swipes are handled.
+  touch-action: pan-y;
+}
+
+.track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: transform;
+}
+
+.slide {
+  // Pin every slide to exactly the viewport width regardless of image size,
+  // otherwise a wide landscape photo grows its slide and covers its neighbours.
+  flex: 0 0 100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+// Whole image (no cropping) centred over a blurred fill of the same picture —
+// works for portrait and landscape on any screen.
+.frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(260px, 56vh, 600px);
+  overflow: hidden;
+  background: #07070b;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--slide-bg);
+    background-size: cover;
+    background-position: center;
+    filter: blur(34px) brightness(0.4) saturate(1.3);
+    transform: scale(1.2);
+  }
+
+  &--dark::before {
+    display: none;
+  }
+
+  img,
+  video {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  iframe {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  @include below(sm) {
+    height: clamp(240px, 48vh, 460px);
+  }
+}
+
+figcaption {
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--fs-xs);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  translate: 0 -50%;
+  color: var(--accent);
+  background: rgba(10, 10, 15, 0.7);
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+
+  &:hover {
+    background: rgba(10, 10, 15, 0.9);
+    box-shadow: var(--glow);
+  }
+
+  &--prev { left: var(--s-3); }
+  &--next { right: var(--s-3); }
+
+  @include below(sm) {
+    width: 40px;
+    height: 40px;
+
+    &--prev { left: var(--s-2); }
+    &--next { right: var(--s-2); }
+  }
+}
+
+.counter {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  z-index: 2;
+  padding: 2px var(--s-3);
+  font-size: var(--fs-xs);
+  color: var(--accent);
+  background: rgba(10, 10, 15, 0.75);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--s-1);
+  margin-top: var(--s-2);
+}
+
+// 24px hit area around an 8px dot.
+.dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  &--active::after {
+    background: var(--accent);
+    box-shadow: var(--glow);
+  }
+}

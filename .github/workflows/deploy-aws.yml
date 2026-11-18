@@ -62,9 +62,6 @@ jobs:
           JWT_SUBSCRIBER_SECRET=${{ secrets.JWT_SUBSCRIBER_SECRET }}
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
           ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
-          INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
-          N8N_CHAT_WEBHOOK_URL=http://n8n:5678/webhook/${{ secrets.N8N_WEBHOOK_ID }}/chat
-          N8N_WEBHOOK_URL=http://localhost:5678/
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}

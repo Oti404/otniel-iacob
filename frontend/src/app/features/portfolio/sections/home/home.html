@@ -1,0 +1,48 @@
+<section class="hero container">
+  <div class="hero-text">
+    @if (profile()?.role) {
+      <p class="role"><span class="prompt">&gt;</span> {{ profile()?.role }}</p>
+    }
+
+    <h1>{{ profile()?.headline ?? 'Building the Future with Code' }}</h1>
+    <p class="name">{{ profile()?.name ?? 'Otniel-Viorel Iacob' }}</p>
+
+    @if (profile()?.quote) {
+      <blockquote class="quote">
+        <p>“{{ profile()?.quote }}”</p>
+        @if (profile()?.quoteAuthor) {
+          <cite>— {{ profile()?.quoteAuthor }}</cite>
+        }
+      </blockquote>
+    }
+
+    <div class="cta">
+      @if (profile()?.email) {
+        <a class="btn" [href]="'mailto:' + profile()?.email">
+          <app-icon name="mail" /> Contact me
+        </a>
+      }
+      <button type="button" class="btn btn--ghost" (click)="scrollTo('projects')">
+        <app-icon name="arrow-down" /> See projects
+      </button>
+      <a class="btn btn--secondary" [href]="profile()?.cvPdf ?? 'documents/otniel-iacob-cv.pdf'" target="_blank" rel="noopener">
+        <app-icon name="file" /> CV
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-visual" aria-hidden="true">
+    <div class="ring ring--1"></div>
+    <div class="ring ring--2"></div>
+
+    @for (o of orbiters; track o.label) {
+      <span class="orbiter" [class.orbiter--outer]="o.ring === 2" [style.--angle]="o.angle + 'deg'">
+        <span class="orbiter-label">{{ o.label }}</span>
+      </span>
+    }
+
+    <div class="core">
+      <img [ngSrc]="avatar()" width="320" height="320" alt="" priority />
+    </div>
+  </div>
+</section>

@@ -1,0 +1,62 @@
+<div class="carousel" aria-roledescription="carousel" [attr.aria-label]="title() + ' media'">
+  <div
+    class="viewport"
+    [attr.tabindex]="multiple() ? 0 : null"
+    (keydown)="onKeydown($event)"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)">
+    <div class="track" [style.transform]="'translateX(-' + current() * 100 + '%)'">
+      @for (m of slides(); track m.id; let i = $index) {
+        <figure class="slide" role="group" aria-roledescription="slide"
+                [attr.aria-label]="(i + 1) + ' of ' + count()"
+                [attr.aria-hidden]="i !== current() ? 'true' : null"
+                [attr.inert]="i !== current() ? '' : null">
+          @switch (m.type) {
+            @case ('IMAGE') {
+              <div class="frame" [style.--slide-bg]="'url(' + (m.url | cldImg: 160) + ')'">
+                <img [src]="m.url | cldImg: 1280" [alt]="m.caption || title()" loading="lazy" decoding="async" />
+              </div>
+            }
+            @case ('VIDEO') {
+              <div class="frame frame--dark">
+                <video controls preload="metadata"><source [src]="m.url" /></video>
+              </div>
+            }
+            @case ('YOUTUBE') {
+              <div class="frame frame--dark">
+                @if (m.embedUrl) {
+                  <iframe [src]="m.embedUrl" [title]="m.caption || title()"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen></iframe>
+                }
+              </div>
+            }
+          }
+          @if (m.caption) {
+            <figcaption>{{ m.caption }}</figcaption>
+          }
+        </figure>
+      }
+    </div>
+
+    @if (multiple()) {
+      <button type="button" class="nav nav--prev" (click)="prev()" aria-label="Previous slide">
+        <app-icon name="chevron-left" [size]="22" />
+      </button>
+      <button type="button" class="nav nav--next" (click)="next()" aria-label="Next slide">
+        <app-icon name="chevron-right" [size]="22" />
+      </button>
+      <span class="counter" aria-live="polite" aria-atomic="true">{{ current() + 1 }} / {{ count() }}</span>
+    }
+  </div>
+
+  @if (multiple()) {
+    <div class="dots">
+      @for (m of slides(); track m.id; let i = $index) {
+        <button type="button" class="dot" [class.dot--active]="i === current()"
+                [attr.aria-current]="i === current() ? 'true' : null"
+                (click)="goTo(i)" [attr.aria-label]="'Go to slide ' + (i + 1)"></button>
+      }
+    </div>
+  }
+</div>

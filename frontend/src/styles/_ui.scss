@@ -1,0 +1,182 @@
+@use 'tokens' as *;
+
+// ─── Shared UI primitives used across the public site ────────────────────────
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--s-5);
+
+  @include below(sm) {
+    padding-inline: var(--s-4);
+  }
+}
+
+.section {
+  padding-block: var(--s-8);
+
+  @include below(sm) {
+    padding-block: var(--s-7);
+  }
+}
+
+// "MISSION LOGS _" — the site's voice for every section heading.
+.section-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin-bottom: var(--s-6);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--accent-2);
+  }
+
+  .cursor {
+    color: var(--accent);
+    animation: blink 1.1s steps(1) infinite;
+  }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: var(--s-2) var(--s-5);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+
+  &:hover {
+    box-shadow: var(--glow);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--accent);
+
+    &:hover {
+      background: var(--accent-soft);
+    }
+  }
+
+  &--secondary {
+    background: transparent;
+    border-color: var(--border-strong);
+    color: var(--text);
+
+    &:hover {
+      border-color: var(--accent-2);
+      color: var(--accent-2);
+      box-shadow: var(--glow-2);
+    }
+  }
+
+  &--sm {
+    min-height: 36px;
+    padding: var(--s-1) var(--s-4);
+    font-size: var(--fs-xs);
+  }
+}
+
+// ─── Chips (tech tags, contributors, statuses) ───────────────────────────────
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 2px var(--s-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--text-muted);
+  white-space: nowrap;
+
+  &--accent {
+    border-color: rgba(var(--accent-rgb), 0.4);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  &--accent-2 {
+    border-color: rgba(var(--accent-2-rgb), 0.4);
+    background: var(--accent-2-soft);
+    color: var(--accent-2);
+  }
+
+  &--warning {
+    border-color: rgba(255, 204, 51, 0.4);
+    color: var(--warning);
+  }
+}
+
+a.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+// ─── Card surface ────────────────────────────────────────────────────────────
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--s-5);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--text-muted);
+}

@@ -5,5 +5,8 @@
   "types": "index.ts",
   "dependencies": {
     "zod": "^3.25.20"
+  },
+  "scripts": {
+    "build": "tsc -p ."
   }
 }

@@ -1,8 +1,8 @@
 /**
  * Backend entry point.
  *
- * Startup: crashes immediately if JWT_SECRET, JWT_REFRESH_SECRET, JWT_SUBSCRIBER_SECRET, or
- * INTERNAL_API_KEY are missing or shorter than 16 chars — misconfigured deploys fail fast
+ * Startup: crashes immediately if JWT_SECRET, JWT_REFRESH_SECRET or JWT_SUBSCRIBER_SECRET
+ * are missing or shorter than 32 chars — misconfigured deploys fail fast
  * rather than silently. JWT_SUBSCRIBER_SECRET must differ from JWT_SECRET: subscriber
  * (Google OAuth) tokens and admin tokens are deliberately signed with different secrets so
  * one can never be replayed as the other.
@@ -11,15 +11,15 @@
  *   GET  /api/health          — DB connectivity probe
  *   GET  /api/*               — public content (no auth)
  *   POST /api/auth/*          — login / refresh / logout (rate-limited)
- *        /api/admin/*         — JWT-protected CRUD + upload + AI chat
- *        /api/internal/*      — n8n automation (x-internal-key)
+ *        /api/admin/*         — JWT-protected CRUD + uploads
+ *        /api/subscriptions/*, /api/push/* — Google subscriber (cookie)
  *   GET  /uploads/*           — static uploaded files
  */
 import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
@@ -28,21 +28,18 @@ import { prisma } from '@monorepo/database';
 import { HealthStatus } from '@monorepo/shared';
 import contentRouter from './routes/content';
 import authRouter from './routes/auth';
-import adminRouter from './routes/admin';
-import adminChroniclesRouter from './routes/admin-chronicles';
-import uploadRouter from './routes/upload';
-import internalRouter from './routes/internal';
-import aiChatRouter from './routes/ai-chat';
 import chroniclesRouter from './routes/chronicles';
 import subscriberAuthRouter from './routes/subscriber-auth';
 import subscriptionsRouter from './routes/subscriptions';
 import pushRouter from './routes/push';
+import adminRouter from './routes/admin';
+import { errorHandler } from './middleware/error-handler';
 
 // ─── Startup validation ───────────────────────────────────────────────────────
-const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'JWT_SUBSCRIBER_SECRET', 'INTERNAL_API_KEY'];
+const required = ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'JWT_SUBSCRIBER_SECRET'];
 for (const key of required) {
-  if (!process.env[key] || process.env[key]!.length < 16) {
-    throw new Error(`Missing or too short env var: ${key} (min 16 chars)`);
+  if (!process.env[key] || process.env[key]!.length < 32) {
+    throw new Error(`Missing or too short env var: ${key} (min 32 chars)`);
   }
 }
 if (process.env.JWT_SECRET === process.env.JWT_SUBSCRIBER_SECRET) {
@@ -62,6 +59,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.disable('x-powered-by');
 app.use(cors({ origin: allowedOrigins, credentials: true }));
+// Admin routes (JWT-protected) carry long passage text; everything public stays at 10kb.
+// body-parser marks the request as parsed, so the global parser below skips it.
+app.use('/api/admin', express.json({ limit: '200kb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
@@ -103,19 +103,12 @@ app.use('/api', contentRouter);
 app.use('/api', chroniclesRouter);
 app.use('/api/auth', subscriberLimiter, subscriberAuthRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/subscriptions', subscriptionsRouter);
-app.use('/api/push', pushRouter);
+app.use('/api/subscriptions', subscriberLimiter, subscriptionsRouter);
+app.use('/api/push', subscriberLimiter, pushRouter);
 app.use('/api/admin', adminRouter);
-app.use('/api/admin', adminChroniclesRouter);
-app.use('/api/admin/upload', uploadRouter);
-app.use('/api/internal', internalRouter);
-app.use('/api/admin/ai-chat', aiChatRouter);
 
 // ─── Global error handler ─────────────────────────────────────────────────────
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[Unhandled error]', err.message);
-  res.status(500).json({ message: 'Internal server error' });
-});
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

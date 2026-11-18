@@ -34,8 +34,16 @@
               "src/assets"
             ],
             "styles": [
+              "@fontsource-variable/jetbrains-mono/wght.css",
+              "@fontsource/orbitron/500.css",
+              "@fontsource/orbitron/700.css",
               "src/styles.scss"
-            ]
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/styles"
+              ]
+            }
           },
           "configurations": {
             "production": {
